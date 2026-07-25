@@ -1,0 +1,190 @@
+/* Grilla Contenedora */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Tarjeta Principal */
+.item-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Cabecera Superior */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.card-serial {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #475569;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.card-top-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Badges estilo original */
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-vigente {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.badge-por-vencer {
+  background-color: #fef9c3;
+  color: #a16207;
+}
+
+.badge-vencido {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Botones de Lápiz y Caneca SST */
+.card-actions-sst {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-action-icon.edit:hover {
+  background-color: #f1f5f9;
+  color: #0284c7;
+  border-color: #cbd5e1;
+}
+
+.btn-action-icon.delete:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* Título */
+.item-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
+  line-height: 1.35;
+}
+
+/* Detalles */
+.item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 1rem;
+}
+
+.detail-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.detail-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.detail-line strong {
+  color: #334155;
+  font-weight: 600;
+}
+
+/* Resumen del Estado (Línea de Certificación Anual) */
+.status-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.825rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.status-summary.vigente {
+  color: #16a34a;
+}
+
+.status-summary.por-vencer {
+  color: #d97706;
+}
+
+.status-summary.vencido {
+  color: #dc2626;
+}
+
+/* Botón Ver Certificado */
+.card-footer {
+  margin-top: auto;
+}
+
+.btn-view-pdf {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: none;
+  padding: 0.65rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view-pdf:hover {
+  background-color: #2563eb;
+  color: #ffffff;
+}
