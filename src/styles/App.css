@@ -77,3 +77,23 @@ input, button, select, textarea {
   color: var(--text-muted);
   font-size: 1.1rem;
 }
+
+.admin-actions{
+  padding: 7px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-primary-add {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background-color: transparent;
+  color: #383737;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+

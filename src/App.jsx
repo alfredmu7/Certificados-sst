@@ -198,7 +198,7 @@ export default function App() {
 
           <div className="admin-actions">
             {esSST && (
-              <button className="btn-primary" onClick={handleOpenCreateModal}>
+              <button className="btn-primary-add" onClick={handleOpenCreateModal}>
                 <Plus size={18} />
                 <span>Nuevo Registro</span>
               </button>
