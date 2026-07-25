@@ -4,31 +4,30 @@ import ItemCard from './components/ItemCard';
 import PdfModal from './components/PdfModal';
 import ItemModal from './components/ItemModal';
 import LoginModal from './components/LoginModal';
-import { initialItems } from './data/initialData';
 import { useAuth } from './context/AuthContext';
+import { supabase } from './supabaseClient';
 import { Plus } from 'lucide-react';
 
 import './styles/App.css';
 
 export default function App() {
-  // 1. Estado persistente con localStorage
-  const [items, setItems] = useState(() => {
-    const datosGuardados = localStorage.getItem('sst_certificados_data');
-    if (datosGuardados) {
-      try {
-        return JSON.parse(datosGuardados);
-      } catch (error) {
-        console.error('Error al leer de localStorage:', error);
-        return initialItems;
-      }
-    }
-    return initialItems;
-  });
+  // 1. Estado para almacenar los items desde Supabase
+  const [items, setItems] = useState([]);
 
-  // Sincronizar cambios en localStorage
+  // Cargar datos desde Supabase al iniciar el componente
+  const fetchItems = async () => {
+    try {
+      const { data, error } = await supabase.from('certificados').select('*');
+      if (error) throw error;
+      if (data) setItems(data);
+    } catch (error) {
+      console.error('Error al cargar datos de Supabase:', error.message);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem('sst_certificados_data', JSON.stringify(items));
-  }, [items]);
+    fetchItems();
+  }, []);
 
   // Sesión y permisos SST
   const { esSST } = useAuth();
@@ -54,43 +53,57 @@ export default function App() {
     setIsItemModalOpen(true);
   };
 
-  const handleDeleteItem = (id) => {
+  const handleDeleteItem = async (id) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este registro de SST?')) {
-      setItems((prev) => prev.filter((item) => item.id !== id));
+      try {
+        const { error } = await supabase.from('certificados').delete().eq('id', id);
+        if (error) throw error;
+        setItems((prev) => prev.filter((item) => item.id !== id));
+      } catch (error) {
+        alert('Error al eliminar el registro: ' + error.message);
+      }
     }
   };
 
   const handleSaveItem = (formData) => {
-    const guardarRegistro = (pdfUrlFinal) => {
-      if (formData.id) {
-        // Editar existente
-        setItems((prev) =>
-          prev.map((item) =>
-            item.id === formData.id
-              ? {
-                  ...item,
-                  serial: formData.serial,
-                  nombre: formData.nombre,
-                  categoria: formData.categoria,
-                  ubicacion: formData.ubicacion,
-                  fechaCertificacion: formData.fechaCertificacion,
-                  pdfUrl: pdfUrlFinal || item.pdfUrl
-                }
-              : item
-          )
-        );
-      } else {
-        // Crear nuevo
-        const nuevoRegistro = {
-          id: Date.now().toString(),
-          serial: formData.serial,
-          nombre: formData.nombre,
-          categoria: formData.categoria,
-          ubicacion: formData.ubicacion,
-          fechaCertificacion: formData.fechaCertificacion,
-          pdfUrl: pdfUrlFinal || '/pdfs/sample.pdf'
-        };
-        setItems((prev) => [nuevoRegistro, ...prev]);
+    const guardarRegistro = async (pdfUrlFinal) => {
+      try {
+        if (formData.id) {
+          // Editar existente en Supabase
+          const { error } = await supabase
+            .from('certificados')
+            .update({
+              serial: formData.serial,
+              nombre: formData.nombre,
+              categoria: formData.categoria,
+              ubicacion: formData.ubicacion,
+              fechaCertificacion: formData.fechaCertificacion,
+              pdfUrl: pdfUrlFinal || formData.pdfUrl
+            })
+            .eq('id', formData.id);
+
+          if (error) throw error;
+        } else {
+          // Crear nuevo en Supabase
+          const nuevoRegistro = {
+            id: Date.now().toString(),
+            serial: formData.serial,
+            nombre: formData.nombre,
+            categoria: formData.categoria,
+            ubicacion: formData.ubicacion,
+            fechaCertificacion: formData.fechaCertificacion,
+            pdfUrl: pdfUrlFinal || '/pdfs/sample.pdf'
+          };
+
+          const { error } = await supabase.from('certificados').insert([nuevoRegistro]);
+          if (error) throw error;
+        }
+
+        // Recargar los datos centralizados
+        fetchItems();
+        setIsItemModalOpen(false);
+      } catch (error) {
+        alert('Error al guardar en la base de datos: ' + error.message);
       }
     };
 
@@ -197,7 +210,6 @@ export default function App() {
         {filteredItems.length > 0 ? (
           <div className="items-grid">
             {filteredItems.map((item) => {
-              {/* AHORA LE PASAMOS AMBOS PARÁMETROS: FECHA Y CATEGORÍA */}
               const calculos = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
 
               return (
