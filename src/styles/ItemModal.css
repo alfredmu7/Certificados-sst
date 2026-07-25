@@ -7,9 +7,9 @@
   background-color: rgba(15, 23, 42, 0.65);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; /* Alineado al centro para pantallas normales */
   z-index: 1000;
-  padding: 1.5rem;
+  padding: 1rem; /* Reducido a 1rem para dar más espacio en móviles */
   backdrop-filter: blur(4px);
 }
 
@@ -17,9 +17,12 @@
   background-color: #ffffff;
   width: 100%;
   max-width: 600px;
+  max-height: 90vh; /* 👈 Novedad: Evita que el modal supere el 90% de la altura de la pantalla */
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+  display: flex; /* 👈 Novedad: Convierte el modal en un contenedor flexible */
+  flex-direction: column;
+  overflow: hidden; /* Evita que la cabecera/footer salgan de la tarjeta */
 }
 
 .modal-header {
@@ -29,6 +32,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0; /* 👈 Novedad: La cabecera nunca se encoge y siempre queda visible */
 }
 
 .modal-header h2 {
@@ -45,7 +49,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 8px; /* Incremente levemente para que sea más fácil de tocar en celular */
   border-radius: 6px;
   transition: all 0.2s ease;
 }
@@ -70,6 +74,9 @@
 
 .item-form {
   padding: 1.5rem;
+  overflow-y: auto; /* 👈 Novedad: Habilita el scroll vertical cuando el contenido no cabe */
+  -webkit-overflow-scrolling: touch; /* 👈 Novedad: Scroll táctil suave en iOS/Android */
+  flex: 1; /* Ocupa el espacio restante del modal */
 }
 
 .form-grid {
@@ -146,6 +153,8 @@
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0; /* Línea divisoria suave para separar las acciones */
 }
 
 .btn-secondary {
@@ -181,11 +190,35 @@
   background-color: #1d4ed8;
 }
 
+/* 📱 Ajustes Responsivos para Dispositivos Móviles */
 @media (max-width: 600px) {
+  .modal-overlay {
+    padding: 0.5rem; /* Menos espacio en los bordes para aprovechar la pantalla */
+  }
+
+  .modal-card.form-modal {
+    max-height: 95vh; /* Aprovecha el 95% del alto de la pantalla del teléfono */
+  }
+
+  .item-form {
+    padding: 1rem; /* Padding más compacto en celulares */
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
+
   .form-group.full-width {
     grid-column: span 1;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse; /* En celulares, el botón de confirmar queda arriba del cancelar */
+    gap: 0.5rem;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%; /* Botones a todo lo ancho para fácil acceso táctil */
+    justify-content: center;
   }
 }
