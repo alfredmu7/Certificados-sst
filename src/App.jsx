@@ -4,6 +4,7 @@ import ItemCard from './components/ItemCard';
 import PdfModal from './components/PdfModal';
 import ItemModal from './components/ItemModal';
 import LoginModal from './components/LoginModal';
+import LoadingState from './components/LoadingState'; // 1. Importación del Loader Dinámico
 import { useAuth } from './context/AuthContext';
 import { supabase } from './supabaseClient';
 import { Plus } from 'lucide-react';
@@ -11,17 +12,21 @@ import { Plus } from 'lucide-react';
 import './styles/App.css';
 
 export default function App() {
-  // 1. Estado para almacenar los items desde Supabase
+  // 1. Estado para almacenar los items desde Supabase y el estado de carga
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true); // Estado inicial en true
 
   // Cargar datos desde Supabase al iniciar el componente
   const fetchItems = async () => {
     try {
+      setLoading(true); // Activa el loader al iniciar la consulta
       const { data, error } = await supabase.from('certificados').select('*');
       if (error) throw error;
       if (data) setItems(data);
     } catch (error) {
       console.error('Error al cargar datos de Supabase:', error.message);
+    } finally {
+      setLoading(false); // Desactiva el loader cuando termina (éxito o error)
     }
   };
 
@@ -206,8 +211,10 @@ export default function App() {
           </div>
         </div>
 
-        {/* Grilla de Tarjetas */}
-        {filteredItems.length > 0 ? (
+        {/* 2. Evaluación del Estado de Carga con LoadingState */}
+        {loading ? (
+          <LoadingState />
+        ) : filteredItems.length > 0 ? (
           <div className="items-grid">
             {filteredItems.map((item) => {
               const calculos = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
