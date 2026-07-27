@@ -2,11 +2,11 @@
    HEADER Y CONTROLES DE BÚSQUEDA (MOBILE-FIRST)
    ========================================================================== */
 
-/* 1. Base (Móviles ultra pequeños desde 320px) */
+/* 1. Base (Móviles ultra pequeños desde 300px) */
 .main-header {
   background-color: var(--primary);
   color: #ffffff;
-  padding: 1rem; /* Espaciado compacto para móviles */
+  padding: 1rem;
   box-shadow: var(--shadow-md);
   width: 100%;
   box-sizing: border-box;
@@ -29,12 +29,12 @@
 
 .brand-icon {
   color: var(--accent);
-  flex-shrink: 0; /* Evita que el icono se deforme */
+  flex-shrink: 0;
 }
 
 .brand h1 {
   margin: 0;
-  font-size: 1.15rem; /* Tamaño legible en celular */
+  font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -49,7 +49,7 @@
 .sst-access-wrapper {
   display: flex;
   align-items: center;
-  flex-shrink: 0; /* Mantiene su tamaño en la esquina derecha */
+  flex-shrink: 0;
 }
 
 /* Base del botón SST */
@@ -86,10 +86,10 @@
   box-shadow: 0 4px 12px rgba(37, 100, 235, 0.5);
 }
 
-/* Secciones de Controles (Buscador y Filtros) */
+/* Controles principales (Buscador y Filtros) */
 .header-controls {
   display: flex;
-  flex-direction: column; /* Apilados verticalmente en móviles */
+  flex-direction: column;
   gap: 0.75rem;
   width: 100%;
 }
@@ -144,19 +144,16 @@
   padding: 4px;
 }
 
-/* Filtros por Categoría con Scroll Horizontal en Móviles */
+/* ==========================================================================
+   FILTROS DE CATEGORÍA Y MENÚ HAMBURGUESA
+   ========================================================================== */
+
 .category-filters {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
+  position: relative;
   width: 100%;
-  overflow-x: auto; /* Permite deslizar si no caben en pantallas pequeñas */
-  padding-bottom: 0.25rem; /* Espacio para no cortar sombras o bordes */
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Oculta scrollbar en Firefox */
-}
-
-.category-filters::-webkit-scrollbar {
-  display: none; /* Oculta scrollbar en Chrome/Safari */
 }
 
 .filter-btn {
@@ -172,8 +169,8 @@
   cursor: pointer;
   font-weight: 500;
   font-size: 0.8rem;
-  white-space: nowrap; /* Mantiene los botones en una sola línea */
-  flex-shrink: 0; /* Evita que el botón se reduzca */
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
@@ -187,9 +184,74 @@
   color: #ffffff;
 }
 
+/* Botones horizontales para Pantallas Medianas / Grandes */
+.desktop-categories {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Contenedor del Menú Hamburguesa Móvil */
+.mobile-dropdown-wrapper {
+  display: none; /* Se activa en pantallas <= 600px */
+  position: relative;
+}
+
+/* Menú flotante desplegable */
+.mobile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background-color: #1e293b;
+  border: 1px solid var(--primary-light);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #334155;
+  color: #ffffff;
+}
+
+.dropdown-item.active {
+  background-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
 /* ==========================================================================
    MEDIA QUERIES (BREAKPOINTS RESPONSIVOS)
    ========================================================================== */
+
+/* 📱 Dispositivos Móviles (Hasta 600px) -> Cambia a Modo Hamburguesa */
+@media (max-width: 600px) {
+  .desktop-categories {
+    display: none !important; /* Oculta los botones individuales */
+  }
+
+  .mobile-dropdown-wrapper {
+    display: block !important; /* Muestra el botón 'Categorías' con icono */
+  }
+}
 
 /* 📱 Dispositivos móviles medianos a grandes (480px a 767px) */
 @media (min-width: 480px) {
@@ -202,10 +264,8 @@
   }
 
   .btn-sst-subtle {
-    
     padding: 0.4rem 0.60rem;
   }
-
 }
 
 /* 💻 Tablets y Pantallas Medianas (768px a 1023px) */
@@ -220,7 +280,7 @@
   }
 
   .header-controls {
-    flex-direction: row; /* Los controles se colocan uno al lado del otro */
+    flex-direction: row;
     align-items: center;
   }
 
@@ -231,7 +291,6 @@
 
   .category-filters {
     width: auto;
-    overflow-x: visible; /* Ya no requiere scroll horizontal */
     flex-shrink: 0;
   }
 
@@ -271,12 +330,11 @@
     padding: 1.75rem 3rem;
   }
 
-  /* Distribución en una sola línea completa para pantallas ultra anchas */
   .header-top {
     margin-bottom: 1.5rem;
   }
 
   .search-box {
-    max-width: 500px; /* Evita que la barra de búsqueda sea exageradamente ancha */
+    max-width: 500px;
   }
 }
