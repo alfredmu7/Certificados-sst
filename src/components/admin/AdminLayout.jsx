@@ -1,3 +1,5 @@
+//Alertas y Notificaciones por Correo Módulo para la automatización de avisos a vencimientos de certificados y ARL.
+
 import React, { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import AdminDashboard from './AdminDashboard';
@@ -30,7 +32,11 @@ export default function AdminLayout({
       {/* Área donde se carga la pestaña activa */}
       <main className="admin-content-area">
         {activeTab === 'dashboard' && (
-          <AdminDashboard items={items} setActiveTab={setActiveTab} />
+          <AdminDashboard 
+            items={items} 
+            obtenerCalculosItem={obtenerCalculosItem} 
+            setActiveTab={setActiveTab} 
+          />
         )}
 
         {activeTab === 'equipos' && (
@@ -56,6 +62,7 @@ export default function AdminLayout({
           <div className="tab-placeholder">
             <h2>Alertas y Notificaciones por Correo</h2>
             <p>Módulo para la automatización de avisos a vencimientos de certificados y ARL.</p>
+            <h2>En mantenimiento.</h2>
           </div>
         )}
       </main>

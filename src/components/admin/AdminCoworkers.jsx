@@ -1,7 +1,8 @@
 //Gestión de Colaboradores, ARL, Exámenes, Cursosimport React from 'react';
 
+// Gestión de Colaboradores, ARL, Exámenes, Cursos
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, FileText, Edit, Trash2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { UserPlus, Search, FileText, Edit, Trash2, CreditCard } from 'lucide-react';
 import CoworkerModal from './CoworkerModal';
 import { supabase } from '../../supabaseClient';
 import '../../styles/AdminCoworkers.css';
@@ -15,7 +16,10 @@ export default function AdminCoworkers({ onSelectPdf }) {
   // Cargar lista de colaboradores desde Supabase
   const fetchCoworkers = async () => {
     try {
-      const { data, error } = await supabase.from('coworkers').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('coworkers')
+        .select('*')
+        .order('created_at', { ascending: false });
       if (error) throw error;
       if (data) setCoworkers(data);
     } catch (err) {
@@ -57,6 +61,7 @@ export default function AdminCoworkers({ onSelectPdf }) {
           cedula: formData.cedula,
           cargo: formData.cargo,
           credencial: formData.credencial,
+          fecha_carnet: formData.fecha_carnet || null, // <-- REGISTRO DE FECHA CARNET
           pdf_url: pdfUrlFinal || formData.pdfUrl,
           documentos: formData.documentos
         };
@@ -86,9 +91,9 @@ export default function AdminCoworkers({ onSelectPdf }) {
   };
 
   const filteredCoworkers = coworkers.filter(c => 
-    c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.cedula.includes(searchTerm) ||
-    c.cargo.toLowerCase().includes(searchTerm.toLowerCase())
+    (c.nombre && c.nombre.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (c.cedula && c.cedula.includes(searchTerm)) ||
+    (c.cargo && c.cargo.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -128,6 +133,14 @@ export default function AdminCoworkers({ onSelectPdf }) {
               <span className="cw-cedula">CC: {c.cedula}</span>
             </div>
 
+            {/* MOSTRAR CARNET DE ACCESO SOLO SI TIENE FECHA AGREGADA */}
+            {c.fecha_carnet && (
+              <div className="cw-carnet-info" style={{ margin: '10px 0', padding: '6px 10px', backgroundColor: '#e0f2fe', borderRadius: '6px', color: '#0369a1', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <CreditCard size={16} />
+                <span><strong>Carnet Acceso:</strong> Vence {c.fecha_carnet}</span>
+              </div>
+            )}
+
             <div className="cw-docs-list">
               <h4>Documentos en PDF ({c.documentos?.length || 0}):</h4>
               <ul>
@@ -142,22 +155,22 @@ export default function AdminCoworkers({ onSelectPdf }) {
 
             <div className="cw-card-actions">
               {c.pdf_url && (
-  <button 
-    className="btn-view-pdf" 
-    onClick={() => {
-      if (typeof onSelectPdf === 'function') {
-        onSelectPdf({ 
-          pdfUrl: c.pdf_url, 
-          nombre: `Documentación - ${c.nombre}` 
-        });
-      } else {
-        alert('No se pudo abrir el visor de PDF.');
-      }
-    }}
-  >
-    <FileText size={16} /> Ver documentación
-  </button>
-)}
+                <button 
+                  className="btn-view-pdf" 
+                  onClick={() => {
+                    if (typeof onSelectPdf === 'function') {
+                      onSelectPdf({ 
+                        pdfUrl: c.pdf_url, 
+                        nombre: `Documentación - ${c.nombre}` 
+                      });
+                    } else {
+                      alert('No se pudo abrir el visor de PDF.');
+                    }
+                  }}
+                >
+                  <FileText size={16} /> Ver documentación
+                </button>
+              )}
               <div className="action-btns-right">
                 <button className="btn-icon edit" onClick={() => handleOpenEdit(c)}><Edit size={16} /></button>
                 <button className="btn-icon delete" onClick={() => handleDelete(c.id)}><Trash2 size={16} /></button>

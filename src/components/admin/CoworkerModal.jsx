@@ -1,7 +1,7 @@
-//Formulario / Modal para Crear y Editar Coworkers
+// Formulario / Modal para Crear y Editar Coworkers
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, FileText, Upload } from 'lucide-react';
+import { X, Plus, Trash2, FileText } from 'lucide-react';
 import '../../styles/CoworkerModal.css';
 
 export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit }) {
@@ -10,6 +10,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
     cedula: '',
     cargo: '',
     credencial: '',
+    fecha_carnet: '',
     pdfUrl: '',
     pdfFile: null,
     documentos: [
@@ -25,6 +26,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
         cedula: coworkerToEdit.cedula || '',
         cargo: coworkerToEdit.cargo || '',
         credencial: coworkerToEdit.credencial || '',
+        fecha_carnet: coworkerToEdit.fecha_carnet || coworkerToEdit.vencimiento_carnet || '',
         pdfUrl: coworkerToEdit.pdf_url || coworkerToEdit.pdfUrl || '',
         pdfFile: null,
         documentos: coworkerToEdit.documentos?.length > 0 
@@ -37,6 +39,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
         cedula: '',
         cargo: '',
         credencial: '',
+        fecha_carnet: '',
         pdfUrl: '',
         pdfFile: null,
         documentos: [
@@ -48,13 +51,13 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
 
   if (!isOpen) return null;
 
-  // Manejar cambios en campos simples
+  // Manejar cambios en inputs de texto, password y fecha
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Manejar carga de PDF
+  // Manejar carga de archivo PDF
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -62,7 +65,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
     }
   };
 
-  // Manejar dinámica de documentos dentro del PDF
+  // Manejar dinámica de documentos internos dentro del PDF
   const handleDocChange = (index, field, value) => {
     const updatedDocs = [...formData.documentos];
     updatedDocs[index][field] = value;
@@ -106,6 +109,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
+          {/* Fila 1: Nombre y Cédula */}
           <div className="form-grid-2">
             <div className="form-group">
               <label>Nombre Completo *</label>
@@ -132,6 +136,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
             </div>
           </div>
 
+          {/* Fila 2: Cargo, Credencial y Fecha Carnet */}
           <div className="form-grid-2">
             <div className="form-group">
               <label>Cargo / Especialidad</label>
@@ -155,6 +160,19 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
                 required 
               />
             </div>
+          </div>
+
+          {/* Fila 3: Vencimiento de Carnet de Acceso */}
+          <div className="form-group" style={{ marginBottom: '1rem' }}>
+            <label htmlFor="fecha_carnet">Vencimiento Carnet de Acceso</label>
+            <input
+              type="date"
+              id="fecha_carnet"
+              name="fecha_carnet"
+              value={formData.fecha_carnet}
+              onChange={handleChange}
+              className="form-control"
+            />
           </div>
 
           {/* Adjunto del archivo PDF consolidado */}

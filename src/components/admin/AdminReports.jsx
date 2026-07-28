@@ -5,6 +5,7 @@ export default function AdminReports() {
     <div className="tab-placeholder">
       <h2>Módulo de Reportes e Informes</h2>
       <p>Aquí generaremos la matriz de legalización e inspecciones para auditoría.</p>
+      <h2>En mantenimiento.</h2>
     </div>
   );
 }

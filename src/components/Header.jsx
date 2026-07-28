@@ -139,7 +139,7 @@ export default function Header({
               className={`filter-btn ${selectedCategory === 'coworkers' ? 'active' : ''}`}
               onClick={() => handleSelectCategory('coworkers')}
             >
-              <UserCheck size={16} /> Personal SST
+              <UserCheck size={16} /> Coworkers
             </button>
           </div>
 
