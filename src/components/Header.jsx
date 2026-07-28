@@ -19,6 +19,15 @@ export default function Header({
     setIsMenuOpen(false);
   };
 
+  // Función con validación de pantalla para el Acceso SST
+  const handleOpenLoginModal = () => {
+    if (window.innerWidth < 1024) {
+      alert("El panel de administración SST solo está disponible desde una computadora (PC / Laptop).");
+      return;
+    }
+    onOpenLogin();
+  };
+
   return (
     <header className="main-header">
       <div className="header-top">
@@ -44,7 +53,7 @@ export default function Header({
           ) : (
             <button 
               className="btn-sst-subtle" 
-              onClick={onOpenLogin}
+              onClick={handleOpenLoginModal}
             >
               <Lock size={14} />
               <span>Acceso SST</span>

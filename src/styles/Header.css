@@ -47,7 +47,7 @@
 
 /* Contenedor del Botón SST */
 .sst-access-wrapper {
-  display: flex;
+  display: none !important;
   align-items: center;
   flex-shrink: 0;
 }
@@ -321,6 +321,9 @@
 
   .filter-btn {
     padding: 0.6rem 1rem;
+  }
+  .sst-access-wrapper {
+    display: flex !important;
   }
 }
 
