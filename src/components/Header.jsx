@@ -35,7 +35,7 @@ export default function Header({
           <ShieldCheck className="brand-icon" size={36} />
           <div>
             <h1>Portal de Certificaciones SST | Johnson Controls</h1>
-            <p>Control de Inspecciones de Escaleras, EPCC, Químicos y Personal SST</p>
+            <p>Control de Inspecciones de Escaleras, EPCC, Químicos y Coworkers</p>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ export default function Header({
                   className={`dropdown-item ${selectedCategory === 'coworkers' ? 'active' : ''}`}
                   onClick={() => handleSelectCategory('coworkers')}
                 >
-                  <UserCheck size={16} /> Personal SST
+                  <UserCheck size={16} /> Coworkers
                 </button>
               </div>
             )}
