@@ -1,0 +1,184 @@
+/* Contenedor principal de la sección de Coworkers */
+.admin-coworkers {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Grilla de tarjetas de colaboradores */
+.coworkers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Tarjeta individual de Coworker */
+.coworker-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.coworker-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Encabezado de la tarjeta */
+.cw-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.cw-card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.cw-cargo {
+  display: block;
+  font-size: 0.825rem;
+  color: #2563eb;
+  font-weight: 500;
+  margin-top: 0.2rem;
+}
+
+.cw-cedula {
+  font-size: 0.75rem;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Lista desglosada de documentos en el PDF */
+.cw-docs-list {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.cw-docs-list h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.cw-docs-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cw-docs-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+  background: #f8fafc;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.cw-docs-list li span {
+  color: #334155;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 65%;
+}
+
+.venc-tag {
+  font-size: 0.725rem;
+  color: #d97706;
+  background: #fffbe3;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #fef3c7;
+  white-space: nowrap;
+}
+
+/* Acciones y botones inferiores */
+.cw-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+}
+
+.btn-view-pdf {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-view-pdf:hover {
+  background: #dbeafe;
+}
+
+.action-btns-right {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  padding: 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.btn-icon.edit {
+  color: #64748b;
+}
+
+.btn-icon.edit:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-icon.delete {
+  color: #ef4444;
+}
+
+.btn-icon.delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}

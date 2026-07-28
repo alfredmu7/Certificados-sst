@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ShieldCheck, FlaskConical, Lock, Unlock, Shield, Menu, X } from 'lucide-react';
+import { Search, ShieldCheck, FlaskConical, Lock, Unlock, Shield, Menu, X, UserCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Header.css';
 
@@ -35,7 +35,7 @@ export default function Header({
           <ShieldCheck className="brand-icon" size={36} />
           <div>
             <h1>Portal de Certificaciones SST | Johnson Controls</h1>
-            <p>Control de Inspecciones de Escaleras y Hoja de vida para productos químicos</p>
+            <p>Control de Inspecciones de Escaleras, EPCC, Químicos y Personal SST</p>
           </div>
         </div>
 
@@ -64,16 +64,22 @@ export default function Header({
 
       {/* Sección de Búsqueda y Filtros */}
       <div className="header-controls">
+        {/* Oculta o deshabilita el buscador estándar cuando se está en la pestaña de Personal SST */}
         <div className="search-box">
           <Search className="search-icon" size={20} />
           <input
             type="text"
-            placeholder="Buscar por serial, nombre o ubicación..."
+            placeholder={
+              selectedCategory === 'coworkers' 
+                ? "Consulta de personal por Cédula y PIN abajo..." 
+                : "Buscar por serial, nombre o ubicación..."
+            }
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
+            disabled={selectedCategory === 'coworkers'}
           />
-          {searchTerm && (
+          {searchTerm && selectedCategory !== 'coworkers' && (
             <button 
               className="clear-search" 
               onClick={() => setSearchTerm('')}
@@ -94,7 +100,7 @@ export default function Header({
             Todos
           </button>
 
-          {/* VISTA DESKTOP / TABLET: Botones individuales directos */}
+          {/* VISTA DESKTOP / TABLET: Categorías individuales */}
           <div className="desktop-categories">
             <button 
               className={`filter-btn ${selectedCategory === 'escaleras' ? 'active' : ''}`}
@@ -127,6 +133,13 @@ export default function Header({
               onClick={() => handleSelectCategory('quimicos')}
             >
               <FlaskConical size={16} /> Químicos
+            </button>
+
+            <button
+              className={`filter-btn ${selectedCategory === 'coworkers' ? 'active' : ''}`}
+              onClick={() => handleSelectCategory('coworkers')}
+            >
+              <UserCheck size={16} /> Personal SST
             </button>
           </div>
 
@@ -174,6 +187,13 @@ export default function Header({
                   onClick={() => handleSelectCategory('quimicos')}
                 >
                   <FlaskConical size={16} /> Químicos
+                </button>
+
+                <button 
+                  className={`dropdown-item ${selectedCategory === 'coworkers' ? 'active' : ''}`}
+                  onClick={() => handleSelectCategory('coworkers')}
+                >
+                  <UserCheck size={16} /> Personal SST
                 </button>
               </div>
             )}

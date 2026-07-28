@@ -1,0 +1,246 @@
+.coworker-lookup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+
+.lookup-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+.lookup-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.icon-badge {
+  width: 48px;
+  height: 48px;
+  background: #eff6ff;
+  color: #2563eb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem auto;
+}
+
+.lookup-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.lookup-header p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.lookup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.input-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.input-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  color: #64748b;
+}
+
+.input-field input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.lookup-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  border: 1px solid #fecaca;
+}
+
+.btn-lookup-submit {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  margin-top: 0.5rem;
+}
+
+.btn-lookup-submit:hover {
+  background: #1d4ed8;
+}
+
+/* Vista del Resultado */
+.lookup-result {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.user-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  background: #dbeafe;
+  color: #2563eb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-details h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.user-cargo {
+  display: block;
+  font-size: 0.825rem;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.user-cedula {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.docs-summary h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.docs-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.docs-summary li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.825rem;
+}
+
+.doc-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-info strong {
+  color: #1e293b;
+}
+
+.doc-info small {
+  color: #64748b;
+}
+
+.doc-expiry {
+  font-size: 0.75rem;
+  color: #d97706;
+  font-weight: 600;
+}
+
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.btn-open-my-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.btn-open-my-pdf:hover {
+  background: #15803d;
+}
+
+.btn-lookup-exit {
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-lookup-exit:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}

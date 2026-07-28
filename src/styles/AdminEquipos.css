@@ -1,0 +1,39 @@
+.admin-equipos {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.admin-filters-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-filters-bar .search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.admin-filters-bar .search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.category-buttons {
+  display: flex;
+  gap: 0.5rem;
+}

@@ -4,29 +4,28 @@ import ItemCard from './components/ItemCard';
 import PdfModal from './components/PdfModal';
 import ItemModal from './components/ItemModal';
 import LoginModal from './components/LoginModal';
-import LoadingState from './components/LoadingState'; // 1. Importación del Loader Dinámico
+import LoadingState from './components/LoadingState';
+import AdminLayout from './components/admin/AdminLayout'; // 👈 Contenedor modular de Admin SST
 import { useAuth } from './context/AuthContext';
 import { supabase } from './supabaseClient';
-import { Plus } from 'lucide-react';
-
+import CoworkerLookup from './components/CoworkerLookup';
 import './styles/App.css';
 
 export default function App() {
-  // 1. Estado para almacenar los items desde Supabase y el estado de carga
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado inicial en true
+  const [loading, setLoading] = useState(true);
 
-  // Cargar datos desde Supabase al iniciar el componente
+  // Cargar datos desde Supabase
   const fetchItems = async () => {
     try {
-      setLoading(true); // Activa el loader al iniciar la consulta
+      setLoading(true);
       const { data, error } = await supabase.from('certificados').select('*');
       if (error) throw error;
       if (data) setItems(data);
     } catch (error) {
       console.error('Error al cargar datos de Supabase:', error.message);
     } finally {
-      setLoading(false); // Desactiva el loader cuando termina (éxito o error)
+      setLoading(false);
     }
   };
 
@@ -34,20 +33,17 @@ export default function App() {
     fetchItems();
   }, []);
 
-  // Sesión y permisos SST
   const { esSST } = useAuth();
 
-  // Estados de Búsqueda, Filtros y Selección
+  // Estados de Búsqueda, Filtros y Modales
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
   const [selectedItem, setSelectedItem] = useState(null);
-
-  // Estados para Modales de SST
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [itemToEdit, setItemToEdit] = useState(null);
 
-  // Funciones de gestión SST (Crear, Editar, Eliminar)
+  // Funciones de gestión SST
   const handleOpenCreateModal = () => {
     setItemToEdit(null);
     setIsItemModalOpen(true);
@@ -74,7 +70,6 @@ export default function App() {
     const guardarRegistro = async (pdfUrlFinal) => {
       try {
         if (formData.id) {
-          // Editar existente en Supabase
           const { error } = await supabase
             .from('certificados')
             .update({
@@ -89,7 +84,6 @@ export default function App() {
 
           if (error) throw error;
         } else {
-          // Crear nuevo en Supabase
           const nuevoRegistro = {
             id: Date.now().toString(),
             serial: formData.serial,
@@ -104,7 +98,6 @@ export default function App() {
           if (error) throw error;
         }
 
-        // Recargar los datos centralizados
         fetchItems();
         setIsItemModalOpen(false);
       } catch (error) {
@@ -121,17 +114,14 @@ export default function App() {
     }
   };
 
-  // Función auxiliar para calcular estados de vencimiento (5 años para químicos, 1 para los demás)
+  // Cálculo de vencimientos
   const obtenerCalculosItem = (fechaCertificacionStr, categoria) => {
     if (!fechaCertificacionStr) return { estado: 'indefinido', badgeInfo: { texto: 'Sin Fecha', clase: '' }, diasRestantes: 0, fechaVencimiento: '' };
 
-    // Evitar desajustes de zona horaria parseando YYYY-MM-DD directamente
     const [year, month, day] = fechaCertificacionStr.split('-').map(Number);
     const fechaCert = new Date(year, month - 1, day);
-    
     const fechaVenc = new Date(fechaCert);
 
-    // Evaluar si es químico (5 años) o cualquier otro equipo (1 año)
     const cat = (categoria || '').toLowerCase().trim();
     const esQuimico = cat === 'quimicos' || cat === 'quimico' || cat.includes('quimico') || cat.includes('fds');
     const añosASumar = esQuimico ? 5 : 1;
@@ -159,20 +149,18 @@ export default function App() {
     const yyyy = fechaVenc.getFullYear();
     const mm = String(fechaVenc.getMonth() + 1).padStart(2, '0');
     const dd = String(fechaVenc.getDate()).padStart(2, '0');
-    const fechaVencimientoFormateada = `${yyyy}-${mm}-${dd}`;
 
     return {
       estado,
       badgeInfo,
       diasRestantes,
-      fechaVencimiento: fechaVencimientoFormateada
+      fechaVencimiento: `${yyyy}-${mm}-${dd}`
     };
   };
 
-  // Lógica de Búsqueda y Filtrado
+  // Filtrado para la vista pública
   const filteredItems = items.filter((item) => {
     const matchesCategory = selectedCategory === 'todos' || item.categoria === selectedCategory;
-
     const searchLower = searchTerm.toLowerCase().trim();
     const matchesSearch =
       item.serial.toLowerCase().includes(searchLower) ||
@@ -183,83 +171,93 @@ export default function App() {
   });
 
   return (
-    <div className="app-container">
-      {/* Encabezado Principal */}
-      <Header
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-        onOpenLogin={() => setIsLoginOpen(true)}
+  <div className="app-container">
+    {/* MODO SST ACTIVO: Carga la vista completa con Sidebar sin abultar App.jsx */}
+    {esSST ? (
+      <AdminLayout
+        items={items}
+        obtenerCalculosItem={obtenerCalculosItem}
+        onOpenCreateModal={handleOpenCreateModal}
+        onOpenEditModal={handleOpenEditModal}
+        onDeleteItem={handleDeleteItem}
+        onSelectPdf={(selected) => setSelectedItem(selected)}
       />
+    ) : (
+      /* MODO PÚBLICO: Vista tradicional de consulta */
+      <>
+        <Header
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          onOpenLogin={() => setIsLoginOpen(true)}
+        />
 
-      {/* Contenido Principal */}
-      <main className="content-area">
-        {/* Barra superior con resumen de conteo y botón de Crear alineado a la derecha */}
-        <div className="admin-bar-wrapper">
-          <div className="results-summary">
-            <span>Mostrando <strong>{filteredItems.length}</strong> elementos encontrados</span>
-          </div>
+        <main className="content-area">
+          {/* Si la categoría seleccionada es 'coworkers', mostramos el formulario con PIN */}
+          {selectedCategory === 'coworkers' ? (
+            <CoworkerLookup onSelectPdf={(selected) => setSelectedItem(selected)} />
+          ) : (
+            /* De lo contrario, mostramos la grilla habitual de equipos/certificados */
+            <>
+              <div className="admin-bar-wrapper">
+                <div className="results-summary">
+                  <span>
+                    Mostrando <strong>{filteredItems.length}</strong> elementos encontrados
+                  </span>
+                </div>
+              </div>
 
-          <div className="admin-actions">
-            {esSST && (
-              <button className="btn-primary-add" onClick={handleOpenCreateModal}>
-                <Plus size={18} />
-                <span>Nuevo Registro</span>
-              </button>
-            )}
-          </div>
-        </div>
+              {loading ? (
+                <LoadingState />
+              ) : filteredItems.length > 0 ? (
+                <div className="items-grid">
+                  {filteredItems.map((item) => {
+                    const calculos = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
 
-        {/* 2. Evaluación del Estado de Carga con LoadingState */}
-        {loading ? (
-          <LoadingState />
-        ) : filteredItems.length > 0 ? (
-          <div className="items-grid">
-            {filteredItems.map((item) => {
-              const calculos = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
+                    return (
+                      <ItemCard
+                        key={item.id}
+                        item={item}
+                        estado={calculos.estado}
+                        badgeInfo={calculos.badgeInfo}
+                        fechaVencimiento={calculos.fechaVencimiento}
+                        diasRestantes={calculos.diasRestantes}
+                        onSelectPdf={(selected) => setSelectedItem(selected)}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="no-results">
+                  <p>
+                    🔍 No se encontraron elementos con la búsqueda "<strong>{searchTerm}</strong>"
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      </>
+    )}
 
-              return (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  estado={calculos.estado}
-                  badgeInfo={calculos.badgeInfo}
-                  fechaVencimiento={calculos.fechaVencimiento}
-                  diasRestantes={calculos.diasRestantes}
-                  onSelectPdf={(selected) => setSelectedItem(selected)}
-                  onEdit={(itemEditar) => handleOpenEditModal(itemEditar)}
-                  onDelete={(idEliminar) => handleDeleteItem(idEliminar)}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="no-results">
-            <p>🔍 No se encontraron elementos con la búsqueda "<strong>{searchTerm}</strong>"</p>
-          </div>
-        )}
-      </main>
+    {/* Modales globales */}
+    <PdfModal
+      item={selectedItem}
+      onClose={() => setSelectedItem(null)}
+    />
 
-      {/* Visor de PDF */}
-      <PdfModal
-        item={selectedItem}
-        onClose={() => setSelectedItem(null)}
-      />
+    <LoginModal
+      isOpen={isLoginOpen}
+      onClose={() => setIsLoginOpen(false)}
+    />
 
-      {/* Modal de Inicio de Sesión SST */}
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-      />
-
-      {/* Modal Formulario para Agregar / Editar */}
-      <ItemModal
-        isOpen={isItemModalOpen}
-        onClose={() => setIsItemModalOpen(false)}
-        onSave={handleSaveItem}
-        itemToEdit={itemToEdit}
-      />
-    </div>
-  );
+    <ItemModal
+      isOpen={isItemModalOpen}
+      onClose={() => setIsItemModalOpen(false)}
+      onSave={handleSaveItem}
+      itemToEdit={itemToEdit}
+    />
+  </div>
+);
 }
