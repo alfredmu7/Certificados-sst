@@ -21,7 +21,7 @@
   border-radius: 12px;
   width: 100%;
   max-width: 420px;
-  padding: 1.5rem;
+  padding: 4px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
   animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -33,6 +33,7 @@
   align-items: center;
   margin-bottom: 1rem;
   border-bottom: 1px solid #f1f5f9;
+  border-radius: 12px;
   padding-bottom: 0.875rem;
 }
 
@@ -52,6 +53,7 @@
   color: #f5f5f5;
   margin: 0;
 }
+
 
 /* Descripción */
 .login-description {

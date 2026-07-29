@@ -119,7 +119,7 @@
 /* Sección de Gráficos y Tablas */
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: 1.25rem;
 }
 
@@ -299,9 +299,141 @@
   text-transform: capitalize;
 }
 
+
+
 .activity-tag.escaleras { background: #dbeafe; color: #1e40af; }
 .activity-tag.epcc { background: #f3e8ff; color: #6b21a8; }
 .activity-tag.quimicos { background: #fef3c7; color: #92400e; }
+
+/* ==========================================
+   SECCIÓN DE ACCESOS RÁPIDOS (QUICK ACTIONS)
+   ========================================== */
+
+.quick-actions-section {
+  margin: 1.5rem 0 2rem 0;
+}
+
+.quick-actions-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 1rem;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap:1rem;
+}
+
+.quick-action-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.quick-action-card:active {
+  transform: translateY(0);
+}
+
+/* Iconos de Accesos Rápidos */
+.quick-action-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.quick-action-icon.blue {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.quick-action-icon.purple {
+  background-color: #f3e8ff;
+  color: #9333ea;
+}
+
+.quick-action-icon.green {
+  background-color: #f0fdf4;
+  color: #16a34a;
+}
+
+.quick-action-icon.amber {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+/* Textos dentro del botón */
+.quick-action-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-action-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.quick-action-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Clases auxiliares limpias para la sección de Actividad Reciente */
+.full-width-card {
+  grid-column: 1 / -1;
+}
+
+.recent-activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.btn-view-all {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.btn-view-all:hover {
+  color: #1d4ed8;
+}
+
+.no-activity-text {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
+  padding: 1rem;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

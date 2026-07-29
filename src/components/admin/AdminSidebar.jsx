@@ -48,7 +48,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, onLogout }) {
       <div className="sidebar-footer">
         <button className="btn-logout-sidebar" onClick={onLogout}>
           <LogOut size={18} />
-          <span>Salir del Modo Admin</span>
+          <span>Salir del Modo SST</span>
         </button>
       </div>
     </aside>

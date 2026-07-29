@@ -52,13 +52,16 @@ export default function LoginModal({ isOpen, onClose }) {
           <div className="form-group">
             <label htmlFor="password">Contraseña de Acceso:</label>
             <div className="input-icon-wrapper">
-              <KeyRound size={18} className="input-icon" />
+              {/* El icono solo se muestra cuando password está vacío */}
+              {!password && <KeyRound size={18} className="input-icon" />}
+              
               <input
                 id="password"
                 type="password"
-                placeholder="Ingresa la clave..."
+                placeholder="        Ingresa la clave..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className={password ? 'has-text' : ''}
                 autoFocus
                 required
               />

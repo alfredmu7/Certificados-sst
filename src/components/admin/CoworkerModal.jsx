@@ -1,5 +1,4 @@
 // Formulario / Modal para Crear y Editar Coworkers
-
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, FileText } from 'lucide-react';
 import '../../styles/CoworkerModal.css';
@@ -51,13 +50,11 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
 
   if (!isOpen) return null;
 
-  // Manejar cambios en inputs de texto, password y fecha
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Manejar carga de archivo PDF
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -65,7 +62,6 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
     }
   };
 
-  // Manejar dinámica de documentos internos dentro del PDF
   const handleDocChange = (index, field, value) => {
     const updatedDocs = [...formData.documentos];
     updatedDocs[index][field] = value;
@@ -104,16 +100,19 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
     <div className="modal-overlay">
       <div className="modal-container coworker-modal">
         <div className="modal-header">
-          <h3>{coworkerToEdit ? 'Editar Colaborador' : 'Nuevo Colaborador / Coworker'}</h3>
-          <button className="btn-close" onClick={onClose}><X size={20} /></button>
+          <h3>{coworkerToEdit ? 'Editar Colaborador' : 'Registrar Nuevo Coworker'}</h3>
+          <button type="button" className="btn-close" onClick={onClose} aria-label="Cerrar modal">
+            <X size={20} />
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
           {/* Fila 1: Nombre y Cédula */}
           <div className="form-grid-2">
             <div className="form-group">
-              <label>Nombre Completo *</label>
+              <label htmlFor="nombre">Nombre Completo *</label>
               <input 
+                id="nombre"
                 type="text" 
                 name="nombre" 
                 value={formData.nombre} 
@@ -124,8 +123,9 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
             </div>
 
             <div className="form-group">
-              <label>Cédula / Documento *</label>
+              <label htmlFor="cedula">Cédula / Documento *</label>
               <input 
+                id="cedula"
                 type="text" 
                 name="cedula" 
                 value={formData.cedula} 
@@ -136,11 +136,12 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
             </div>
           </div>
 
-          {/* Fila 2: Cargo, Credencial y Fecha Carnet */}
+          {/* Fila 2: Cargo y Credencial */}
           <div className="form-grid-2">
             <div className="form-group">
-              <label>Cargo / Especialidad</label>
+              <label htmlFor="cargo">Cargo / Especialidad</label>
               <input 
+                id="cargo"
                 type="text" 
                 name="cargo" 
                 value={formData.cargo} 
@@ -150,8 +151,9 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
             </div>
 
             <div className="form-group">
-              <label>Credencial de Acceso Personal *</label>
+              <label htmlFor="credencial">Credencial de Acceso Personal *</label>
               <input 
+                id="credencial"
                 type="password" 
                 name="credencial" 
                 value={formData.credencial} 
@@ -163,7 +165,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
           </div>
 
           {/* Fila 3: Vencimiento de Carnet de Acceso */}
-          <div className="form-group" style={{ marginBottom: '1rem' }}>
+          <div className="form-group">
             <label htmlFor="fecha_carnet">Vencimiento Carnet de Acceso</label>
             <input
               type="date"
@@ -175,13 +177,28 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
             />
           </div>
 
-          {/* Adjunto del archivo PDF consolidado */}
-          <div className="form-group file-upload-box">
-            <label><FileText size={16} /> Documento PDF Consolidado (ARL, Exámenes, Cursos)</label>
-            <input type="file" accept=".pdf" onChange={handleFileChange} />
-            {formData.pdfUrl && !formData.pdfFile && (
-              <span className="file-status">PDF actual cargado previamente.</span>
-            )}
+          {/* Adjunto del archivo PDF estilo área punteada */}
+          <div className="form-group">
+            <label className="pdf-upload-title">Documento PDF Consolidado *</label>
+            <div className="file-dropzone-container">
+              <input 
+                type="file" 
+                id="pdf-upload-input" 
+                accept=".pdf" 
+                onChange={handleFileChange} 
+                style={{ display: 'none' }} 
+              />
+              <label htmlFor="pdf-upload-input" className="file-dropzone-label">
+                <FileText size={20} className="pdf-icon" />
+                <span>
+                  {formData.pdfFile 
+                    ? formData.pdfFile.name 
+                    : formData.pdfUrl 
+                      ? "PDF cargado previamente (Haz clic para cambiar)" 
+                      : "Seleccionar Archivo PDF"}
+                </span>
+              </label>
+            </div>
           </div>
 
           {/* Registro detallado de contenidos dentro del PDF */}
@@ -200,6 +217,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
                   <select 
                     value={doc.tipo} 
                     onChange={(e) => handleDocChange(index, 'tipo', e.target.value)}
+                    className="form-control"
                   >
                     <option value="Seguridad Social / ARL">Seguridad Social / ARL</option>
                     <option value="Examen Médico Ocupacional">Examen Médico Ocupacional</option>
@@ -242,6 +260,7 @@ export default function CoworkerModal({ isOpen, onClose, onSave, coworkerToEdit 
             ))}
           </div>
 
+          {/* Botones de acción */}
           <div className="modal-actions">
             <button type="button" className="btn-secondary" onClick={onClose}>Cancelar</button>
             <button type="submit" className="btn-primary">Guardar Colaborador</button>

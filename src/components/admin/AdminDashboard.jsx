@@ -6,12 +6,16 @@ import {
   ArrowUpRight,
   UserCheck,
   CreditCard,
-  CheckCircle
+  CheckCircle,
+  PlusCircle,
+  UserPlus,
+  FileText,
+  ShieldAlert
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 import '../../styles/AdminDashboard.css';
 
-export default function AdminDashboard({ items = [], obtenerCalculosItem, setActiveTab }) {
+export default function AdminDashboard({ items = [], obtenerCalculosItem, setActiveTab, onOpenModal }) {
   const [coworkersData, setCoworkersData] = useState([]);
   const [loadingCoworkers, setLoadingCoworkers] = useState(true);
 
@@ -21,7 +25,8 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
       try {
         const { data, error } = await supabase
           .from('coworkers')
-          .select('*');
+          .select('*')
+          .order('created_at', { ascending: false });
 
         if (error) throw error;
         setCoworkersData(data || []);
@@ -52,6 +57,13 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
       else if (estado === 'por-vencer') equipPorVencer++;
       else if (estado === 'vencido') equipVencidos++;
     }
+  });
+
+  // --- ORDENAR EQUIPOS PARA LA SECCIÓN "ÚLTIMOS REGISTRADOS" ---
+  const equiposOrdenados = [...items].sort((a, b) => {
+    const fechaA = new Date(a.created_at || a.fechaCreacion || a.id);
+    const fechaB = new Date(b.created_at || b.fechaCreacion || b.id);
+    return fechaB - fechaA;
   });
 
   // --- CÁLCULOS DOCUMENTACIÓN COWORKERS ---
@@ -111,7 +123,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
 
       {/* Tarjetas KPI */}
       <div className="kpi-grid">
-        <div className="kpi-card" onClick={() => setActiveTab('equipos')}>
+        <div className="kpi-card" onClick={() => setActiveTab && setActiveTab('equipos')}>
           <div className="kpi-info">
             <span className="kpi-value">{totalEquipos}</span>
             <span className="kpi-label">Total Equipos</span>
@@ -121,7 +133,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        <div className="kpi-card" onClick={() => setActiveTab('equipos')}>
+        <div className="kpi-card" onClick={() => setActiveTab && setActiveTab('equipos')}>
           <div className="kpi-info">
             <span className="kpi-value">{equipVigentes}</span>
             <span className="kpi-label">Equipos Vigentes</span>
@@ -131,7 +143,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        <div className="kpi-card" onClick={() => setActiveTab('equipos')}>
+        <div className="kpi-card" onClick={() => setActiveTab && setActiveTab('equipos')}>
           <div className="kpi-info">
             <span className="kpi-value">{equipPorVencer + equipVencidos}</span>
             <span className="kpi-label">Equipos en Alerta</span>
@@ -141,7 +153,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        <div className="kpi-card" onClick={() => setActiveTab('coworkers')}>
+        <div className="kpi-card" onClick={() => setActiveTab && setActiveTab('coworkers')}>
           <div className="kpi-info">
             <span className="kpi-value">{loadingCoworkers ? '...' : totalCoworkers}</span>
             <span className="kpi-label">Técnicos Registrados</span>
@@ -151,7 +163,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        <div className="kpi-card" onClick={() => setActiveTab('coworkers')}>
+        <div className="kpi-card" onClick={() => setActiveTab && setActiveTab('coworkers')}>
           <div className="kpi-info">
             <span className="kpi-value">{coworkersAlDia}</span>
             <span className="kpi-label">Personal Habilitado</span>
@@ -161,7 +173,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        <div className="kpi-card" onClick={() => setActiveTab('coworkers')}>
+        <div className="kpi-card" onClick={() => setActiveTab && setActiveTab('coworkers')}>
           <div className="kpi-info">
             <span className="kpi-value">{carnetsPorVencer}</span>
             <span className="kpi-label">Carnets por Vencer</span>
@@ -171,6 +183,77 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
       </div>
+
+      {/* --- SECCIÓN ACCESOS RÁPIDOS --- */}
+<div className="quick-actions-section">
+  <h3 className="quick-actions-title">Accesos Rápidos</h3>
+  <div className="quick-actions-grid">
+    
+    <button 
+      type="button"
+      className="quick-action-card"
+      onClick={() => {
+        if (setActiveTab) setActiveTab('equipos');
+        if (onOpenModal) onOpenModal('equipo');
+      }}
+    >
+      <div className="quick-action-icon blue">
+        <PlusCircle size={20} />
+      </div>
+      <div className="quick-action-text">
+        <span className="quick-action-label">Nuevo Equipo</span>
+        <span className="quick-action-desc">Registrar escalera, EPCC o químico</span>
+      </div>
+    </button>
+
+    <button 
+      type="button"
+      className="quick-action-card"
+      onClick={() => {
+        if (setActiveTab) setActiveTab('coworkers');
+        if (onOpenModal) onOpenModal('coworker');
+      }}
+    >
+      <div className="quick-action-icon purple">
+        <UserPlus size={20} />
+      </div>
+      <div className="quick-action-text">
+        <span className="quick-action-label">Nuevo Técnico</span>
+        <span className="quick-action-desc">Agregar colaborador o contratista</span>
+      </div>
+    </button>
+
+    <button 
+      type="button"
+      className="quick-action-card"
+      onClick={() => setActiveTab && setActiveTab('equipos')}
+    >
+      <div className="quick-action-icon green">
+        <FileText size={20} />
+      </div>
+      <div className="quick-action-text">
+        <span className="quick-action-label">Ver Inspecciones</span>
+        <span className="quick-action-desc">Gestionar estado e inspecciones</span>
+      </div>
+    </button>
+
+    {/* BOTÓN ACTUALIZADO PARA ALERTAS SST */}
+    <button 
+      type="button"
+      className="quick-action-card"
+      onClick={() => setActiveTab && setActiveTab('alertas')}
+    >
+      <div className="quick-action-icon amber">
+        <ShieldAlert size={20} />
+      </div>
+      <div className="quick-action-text">
+        <span className="quick-action-label">Alertas SST</span>
+        <span className="quick-action-desc">Revisar vencimientos y carnets</span>
+      </div>
+    </button>
+
+  </div>
+</div>
 
       {/* Grilla de las 3 Gráficas Principales */}
       <div className="charts-grid">
@@ -312,7 +395,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           <div className="progress-list">
             <div className="progress-item">
               <div className="progress-header">
-                <span style={{ color: '#16a34a' }}>vigentes</span>
+                <span style={{ color: '#16a34a' }}>Vigentes</span>
                 <span>{coworkersAlDia} ({pctCoworkersAlDia}%)</span>
               </div>
               <div className="progress-track">
@@ -345,32 +428,22 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
         </div>
 
         {/* Fila Inferior: Actividad Reciente */}
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="chart-card full-width-card">
+          <div className="recent-activity-header">
             <div>
               <h3>Últimos Equipos Registrados</h3>
               <p>Inspecciones e ingresos recientes en el sistema</p>
             </div>
             <button 
-              onClick={() => setActiveTab('equipos')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                border: 'none',
-                background: 'transparent',
-                color: '#2563eb',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                cursor: 'pointer'
-              }}
+              onClick={() => setActiveTab && setActiveTab('equipos')}
+              className="btn-view-all"
             >
               Ver Todos <ArrowUpRight size={16} />
             </button>
           </div>
 
           <div className="recent-activity-list">
-            {items.slice(0, 4).map((item) => (
+            {equiposOrdenados.slice(0, 4).map((item) => (
               <div key={item.id} className="activity-item">
                 <div className="activity-info">
                   <span className="activity-title">{item.nombre || item.serial}</span>
@@ -381,8 +454,8 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
                 </span>
               </div>
             ))}
-            {items.length === 0 && (
-              <p style={{ fontSize: '0.875rem', color: '#64748b', textAlign: 'center', padding: '1rem' }}>
+            {equiposOrdenados.length === 0 && (
+              <p className="no-activity-text">
                 No hay equipos ni certificados registrados aún.
               </p>
             )}

@@ -80,7 +80,7 @@ export default function ItemModal({ isOpen, onClose, onSave, itemToEdit }) {
       <div className="modal-card form-modal">
         {/* Encabezado */}
         <div className="modal-header">
-          <h2>{itemToEdit ? 'Editar Certificado SST' : 'Registrar Nuevo Elemento'}</h2>
+          <h2>{itemToEdit ? 'Editar Certificado SST' : 'Registrar Nuevo Equipo'}</h2>
           <button type="button" className="btn-close" onClick={onClose} aria-label="Cerrar modal">
             <X size={20} />
           </button>
