@@ -13,15 +13,26 @@ import './styles/App.css';
 
 export default function App() {
   const [items, setItems] = useState([]);
+  const [coworkers, setCoworkers] = useState([]); // 👈 1. Estado para almacenar coworkers
   const [loading, setLoading] = useState(true);
 
   // Cargar datos desde Supabase
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('certificados').select('*');
-      if (error) throw error;
-      if (data) setItems(data);
+
+      // Carga simultánea de certificados/equipos y colaboradores
+      const [certificadosRes, coworkersRes] = await Promise.all([
+        supabase.from('certificados').select('*'),
+        supabase.from('coworkers').select('*') // 👈 2. Carga de la tabla de colaboradores
+      ]);
+
+      if (certificadosRes.error) throw certificadosRes.error;
+      if (certificadosRes.data) setItems(certificadosRes.data);
+
+      if (coworkersRes.data) {
+        setCoworkers(coworkersRes.data);
+      }
     } catch (error) {
       console.error('Error al cargar datos de Supabase:', error.message);
     } finally {
@@ -171,93 +182,94 @@ export default function App() {
   });
 
   return (
-  <div className="app-container">
-    {/* MODO SST ACTIVO: Carga la vista completa con Sidebar sin abultar App.jsx */}
-    {esSST ? (
-      <AdminLayout
-        items={items}
-        obtenerCalculosItem={obtenerCalculosItem}
-        onOpenCreateModal={handleOpenCreateModal}
-        onOpenEditModal={handleOpenEditModal}
-        onDeleteItem={handleDeleteItem}
-        onSelectPdf={(selected) => setSelectedItem(selected)}
-      />
-    ) : (
-      /* MODO PÚBLICO: Vista tradicional de consulta */
-      <>
-        <Header
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          onOpenLogin={() => setIsLoginOpen(true)}
+    <div className="app-container">
+      {/* MODO SST ACTIVO: Carga la vista completa con Sidebar pasándole Equipos y Coworkers */}
+      {esSST ? (
+        <AdminLayout
+          items={items}
+          coworkers={coworkers} // 👈 3. Pasamos coworkers a AdminLayout
+          obtenerCalculosItem={obtenerCalculosItem}
+          onOpenCreateModal={handleOpenCreateModal}
+          onOpenEditModal={handleOpenEditModal}
+          onDeleteItem={handleDeleteItem}
+          onSelectPdf={(selected) => setSelectedItem(selected)}
         />
+      ) : (
+        /* MODO PÚBLICO: Vista tradicional de consulta */
+        <>
+          <Header
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            onOpenLogin={() => setIsLoginOpen(true)}
+          />
 
-        <main className="content-area">
-          {/* Si la categoría seleccionada es 'coworkers', mostramos el formulario con PIN */}
-          {selectedCategory === 'coworkers' ? (
-            <CoworkerLookup onSelectPdf={(selected) => setSelectedItem(selected)} />
-          ) : (
-            /* De lo contrario, mostramos la grilla habitual de equipos/certificados */
-            <>
-              <div className="admin-bar-wrapper">
-                <div className="results-summary">
-                  <span>
-                    Mostrando <strong>{filteredItems.length}</strong> elementos encontrados
-                  </span>
+          <main className="content-area">
+            {/* Si la categoría seleccionada es 'coworkers', mostramos el formulario con PIN */}
+            {selectedCategory === 'coworkers' ? (
+              <CoworkerLookup onSelectPdf={(selected) => setSelectedItem(selected)} />
+            ) : (
+              /* De lo contrario, mostramos la grilla habitual de equipos/certificados */
+              <>
+                <div className="admin-bar-wrapper">
+                  <div className="results-summary">
+                    <span>
+                      Mostrando <strong>{filteredItems.length}</strong> elementos encontrados
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {loading ? (
-                <LoadingState />
-              ) : filteredItems.length > 0 ? (
-                <div className="items-grid">
-                  {filteredItems.map((item) => {
-                    const calculos = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
+                {loading ? (
+                  <LoadingState />
+                ) : filteredItems.length > 0 ? (
+                  <div className="items-grid">
+                    {filteredItems.map((item) => {
+                      const calculos = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
 
-                    return (
-                      <ItemCard
-                        key={item.id}
-                        item={item}
-                        estado={calculos.estado}
-                        badgeInfo={calculos.badgeInfo}
-                        fechaVencimiento={calculos.fechaVencimiento}
-                        diasRestantes={calculos.diasRestantes}
-                        onSelectPdf={(selected) => setSelectedItem(selected)}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="no-results">
-                  <p>
-                    🔍 No se encontraron elementos con la búsqueda "<strong>{searchTerm}</strong>"
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </main>
-      </>
-    )}
+                      return (
+                        <ItemCard
+                          key={item.id}
+                          item={item}
+                          estado={calculos.estado}
+                          badgeInfo={calculos.badgeInfo}
+                          fechaVencimiento={calculos.fechaVencimiento}
+                          diasRestantes={calculos.diasRestantes}
+                          onSelectPdf={(selected) => setSelectedItem(selected)}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="no-results">
+                    <p>
+                      🔍 No se encontraron elementos con la búsqueda "<strong>{searchTerm}</strong>"
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </main>
+        </>
+      )}
 
-    {/* Modales globales */}
-    <PdfModal
-      item={selectedItem}
-      onClose={() => setSelectedItem(null)}
-    />
+      {/* Modales globales */}
+      <PdfModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
 
-    <LoginModal
-      isOpen={isLoginOpen}
-      onClose={() => setIsLoginOpen(false)}
-    />
+      <LoginModal
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+      />
 
-    <ItemModal
-      isOpen={isItemModalOpen}
-      onClose={() => setIsItemModalOpen(false)}
-      onSave={handleSaveItem}
-      itemToEdit={itemToEdit}
-    />
-  </div>
-);
+      <ItemModal
+        isOpen={isItemModalOpen}
+        onClose={() => setIsItemModalOpen(false)}
+        onSave={handleSaveItem}
+        itemToEdit={itemToEdit}
+      />
+    </div>
+  );
 }

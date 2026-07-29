@@ -59,8 +59,7 @@ export default function CoworkerLookup({ onSelectPdf }) {
           <div className="icon-badge">
             <Lock size={22} />
           </div>
-          <h2>Consulta Individual de Personal</h2>
-          <p>Ingresa tu número de identificación y tu PIN privado asignado por SST para ver tus documentos.</p>
+          <h2>Consulta individual del coworker</h2>
         </div>
 
         {!coworker ? (
@@ -79,7 +78,7 @@ export default function CoworkerLookup({ onSelectPdf }) {
             </div>
 
             <div className="input-group">
-              <label>PIN / Credencial Privada</label>
+              <label>PIN </label>
               <div className="input-field">
                 <KeyRound size={18} />
                 <input
@@ -142,14 +141,14 @@ export default function CoworkerLookup({ onSelectPdf }) {
                   }
                 >
                   <FileText size={18} />
-                  Ver Mi Expediente PDF
+                  Ver Mi Documentación
                 </button>
               ) : (
                 <p className="no-pdf-notice">Aún no se ha adjuntado un archivo PDF a tu registro.</p>
               )}
 
               <button className="btn-lookup-exit" onClick={handleLimpiar}>
-                Cerrar Sesión de Consulta
+                Cerrar Sesión
               </button>
             </div>
           </div>

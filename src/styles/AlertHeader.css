@@ -1,0 +1,63 @@
+/* src/styles/AlertHeader.css */
+
+.alert-header-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Estado Rojo: Vencido */
+.banner-danger {
+  background-color: #fef2f2;
+  border-left: 5px solid #ef4444;
+  color: #991b1b;
+}
+
+.banner-danger .banner-icon {
+  color: #ef4444;
+}
+
+/* Estado Amarillo: Por Vencer */
+.banner-warning {
+  background-color: #fffbeb;
+  border-left: 5px solid #f59e0b;
+  color: #92400e;
+}
+
+.banner-warning .banner-icon {
+  color: #f59e0b;
+}
+
+.banner-info h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.banner-info p {
+  margin: 0.2rem 0 0 0;
+  font-size: 0.825rem;
+  opacity: 0.9;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

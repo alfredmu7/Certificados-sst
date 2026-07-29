@@ -16,8 +16,8 @@ export default function AdminSidebar({ activeTab, setActiveTab, onLogout }) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'equipos', label: 'Equipos e Inspecciones', icon: ShieldAlert },
     { id: 'coworkers', label: 'Personal / Coworkers', icon: Users },
-    { id: 'reportes', label: 'Reportes e Informes', icon: FileSpreadsheet },
     { id: 'alertas', label: 'Alertas y Notificaciones', icon: Bell },
+    { id: 'reportes', label: 'Reportes e Informes', icon: FileSpreadsheet },
   ];
 
   return (
