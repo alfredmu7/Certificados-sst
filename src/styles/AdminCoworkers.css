@@ -142,11 +142,15 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease;
+  
 }
 
 .btn-view-pdf:hover {
-  background: #dbeafe;
+  background: #2563eb;
+   color: #ffffff;
+     
 }
+
 
 .action-btns-right {
   display: flex;

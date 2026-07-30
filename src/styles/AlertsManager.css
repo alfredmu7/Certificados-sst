@@ -180,17 +180,25 @@
 .days-warning { color: #d97706; }
 .days-positive { color: #059669; }
 
-.btn-view-pdf {
+.btn-view-pdf-ver {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  color: #2563eb;
+  gap: 6px;
+  padding: 6px 15px;
+  background-color: transparent;
+  color: rgba(90, 89, 89, 0.651);
+  border: none;
+  font-size: 0.85rem;
   font-weight: 500;
-  text-decoration: none;
-  font-size: 0.825rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
-.btn-view-pdf:hover { text-decoration: underline; }
+.btn-view-pdf-ver:disabled {
+  background-color: transparent;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
 .empty-table-msg {
   text-align: center;

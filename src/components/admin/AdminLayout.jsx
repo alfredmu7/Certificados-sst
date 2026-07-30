@@ -9,8 +9,27 @@ import AlertsManager from '../alerts/AlertsManager';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/AdminLayout.css';
 
+const calcularEstadoVencimiento = (fechaStr) => {
+  if (!fechaStr) return { dias: 0, estado: 'indefinido' };
+
+  const [y, m, d] = fechaStr.split('-').map(Number);
+  const fVenc = new Date(y, m - 1, d);
+  const hoy = new Date();
+
+  fVenc.setHours(0, 0, 0, 0);
+  hoy.setHours(0, 0, 0, 0);
+
+  const dias = Math.ceil((fVenc - hoy) / (1000 * 60 * 60 * 24));
+
+  let estado = 'vigente';
+  if (dias < 0) estado = 'vencido';
+  else if (dias <= 30) estado = 'por-vencer';
+
+  return { dias, estado };
+};
+
 export default function AdminLayout({
-  items = [],               // Certificados / Equipos
+  items = [],               // Certificados / Equipos / Escaleras / Químicos
   coworkers = [],           // Colaboradores
   obtenerCalculosItem,
   onOpenCreateModal,
@@ -21,9 +40,8 @@ export default function AdminLayout({
   const { logoutSST } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Normalización y sincronización de fechas, categorías y días restantes
   const unifiedAlertItems = useMemo(() => {
-    // 1. MAPEACIÓN DE EQUIPOS / CERTIFICADOS
+    // 1. MAPEACIÓN DE EQUIPOS / CERTIFICADOS (Escaleras, Químicos, etc.)
     const mappedEquipos = items.map((eq, index) => {
       const calculos = obtenerCalculosItem 
         ? obtenerCalculosItem(eq.fechaCertificacion || eq.fecha_certificacion, eq.categoria)
@@ -32,62 +50,40 @@ export default function AdminLayout({
       const fechaVencimientoFinal = calculos?.fechaVencimiento || eq.fechaVencimiento || eq.vencimiento || '';
       
       let diasRestantesFinal = calculos?.diasRestantes;
+      let estadoCalculado = calculos?.estado;
+
       if (diasRestantesFinal === undefined || diasRestantesFinal === null) {
-        if (fechaVencimientoFinal) {
-          const [y, m, d] = fechaVencimientoFinal.split('-').map(Number);
-          const fVenc = new Date(y, m - 1, d);
-          const hoy = new Date();
-          hoy.setHours(0, 0, 0, 0);
-          fVenc.setHours(0, 0, 0, 0);
-          diasRestantesFinal = Math.ceil((fVenc - hoy) / (1000 * 60 * 60 * 24));
-        } else {
-          diasRestantesFinal = 0;
-        }
+        const res = calcularEstadoVencimiento(fechaVencimientoFinal);
+        diasRestantesFinal = res.dias;
+        if (!estadoCalculado) estadoCalculado = res.estado;
       }
 
-      let estadoCalculado = 'vigente';
-      if (diasRestantesFinal < 0) estadoCalculado = 'vencido';
-      else if (diasRestantesFinal <= 30) estadoCalculado = 'por-vencer';
+      // Extraemos el PDF o documento asociado
+      const pdfUrl = eq.pdfUrl || eq.pdf || eq.archivo || eq.documentoUrl || eq.certificadoUrl || null;
 
       return {
         id: `eq-${eq.id || index}`,
         entidadNombre: eq.nombre || eq.equipo || 'Equipo Sin Nombre',
         identificador: eq.serial || eq.codigo || 'S/N',
         tipoCategoria: eq.categoria || 'Equipo',
-        nombreDocumento: 'Certificado de Inspección', // Genérico para equipos
+        nombreDocumento: 'Certificado de Inspección',
         fechaVencimiento: fechaVencimientoFinal,
         diasRestantes: diasRestantesFinal,
-        estado: calculos?.estado || estadoCalculado
+        estado: estadoCalculado || 'vigente',
+        pdfUrl: pdfUrl // <--- Preservamos la URL del PDF
       };
     });
 
-    // 2. MAPEACIÓN DE COWORKERS Y SUS DOCUMENTOS / VENCIMIENTOS
+    // 2. MAPEACIÓN DE COWORKERS Y SUS DOCUMENTOS
     const mappedCoworkers = coworkers.flatMap((cw, index) => {
       const records = [];
-
-      const calcularDias = (fechaStr) => {
-        if (!fechaStr) return { dias: 0, estado: 'indefinido' };
-        const [y, m, d] = fechaStr.split('-').map(Number);
-        const fVenc = new Date(y, m - 1, d);
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        fVenc.setHours(0, 0, 0, 0);
-        
-        const dias = Math.ceil((fVenc - hoy) / (1000 * 60 * 60 * 24));
-        let est = 'vigente';
-        if (dias < 0) est = 'vencido';
-        else if (dias <= 30) est = 'por-vencer';
-
-        return { dias, estado: est };
-      };
-
       const nombreCoworker = cw.nombre || cw.nombreCompleto || cw.nombres || 'Colaborador';
       const idCoworker = cw.cedula || cw.documento || cw.pin || 'S/C';
 
       // Vencimiento ARL
       if (cw.fecha_arl || cw.vencimiento_arl) {
         const fecha = cw.fecha_arl || cw.vencimiento_arl;
-        const calc = calcularDias(fecha);
+        const calc = calcularEstadoVencimiento(fecha);
         records.push({
           id: `cw-arl-${cw.id || index}`,
           entidadNombre: nombreCoworker,
@@ -96,14 +92,15 @@ export default function AdminLayout({
           nombreDocumento: 'Afiliación / Planilla ARL',
           fechaVencimiento: fecha,
           diasRestantes: calc.dias,
-          estado: calc.estado
+          estado: calc.estado,
+          pdfUrl: cw.pdf_arl || cw.arl_pdf || cw.pdfUrl || null
         });
       }
 
       // Vencimiento Carnet
       if (cw.fecha_carnet || cw.vencimiento_carnet) {
         const fecha = cw.fecha_carnet || cw.vencimiento_carnet;
-        const calc = calcularDias(fecha);
+        const calc = calcularEstadoVencimiento(fecha);
         records.push({
           id: `cw-carnet-${cw.id || index}`,
           entidadNombre: nombreCoworker,
@@ -112,16 +109,17 @@ export default function AdminLayout({
           nombreDocumento: 'Carnet de Acceso',
           fechaVencimiento: fecha,
           diasRestantes: calc.dias,
-          estado: calc.estado
+          estado: calc.estado,
+          pdfUrl: cw.pdf_carnet || cw.carnet_pdf || cw.pdfUrl || null
         });
       }
 
-      // Vencimientos en la lista array 'documentos' del Coworker
+      // Vencimientos en el array 'documentos' del Coworker
       if (Array.isArray(cw.documentos)) {
         cw.documentos.forEach((doc, docIdx) => {
           const fechaDoc = doc.fechaVencimiento || doc.vencimiento || doc.fecha_vencimiento;
           if (fechaDoc) {
-            const calc = calcularDias(fechaDoc);
+            const calc = calcularEstadoVencimiento(fechaDoc);
             records.push({
               id: `cw-doc-${cw.id || index}-${docIdx}`,
               entidadNombre: nombreCoworker,
@@ -130,15 +128,17 @@ export default function AdminLayout({
               nombreDocumento: doc.nombre || doc.tipo || doc.nombreDocumento || 'Certificado / Examen SST',
               fechaVencimiento: fechaDoc,
               diasRestantes: calc.dias,
-              estado: calc.estado
+              estado: calc.estado,
+              pdfUrl: doc.pdfUrl || doc.pdf || doc.archivo || null
             });
           }
         });
       }
 
-      // Registro general si el coworker no tiene aún documentos en sub-listas
+      // Registro general si el coworker no tiene subdocumentos específicos
       if (records.length === 0) {
         const fechaGeneral = cw.fechaVencimiento || cw.vencimiento || '';
+        const calc = calcularEstadoVencimiento(fechaGeneral);
         records.push({
           id: `cw-base-${cw.id || index}`,
           entidadNombre: nombreCoworker,
@@ -146,8 +146,9 @@ export default function AdminLayout({
           tipoCategoria: 'Coworker',
           nombreDocumento: 'Documentación General',
           fechaVencimiento: fechaGeneral,
-          diasRestantes: fechaGeneral ? calcularDias(fechaGeneral).dias : 0,
-          estado: fechaGeneral ? calcularDias(fechaGeneral).estado : 'vigente'
+          diasRestantes: calc.dias,
+          estado: fechaGeneral ? calc.estado : 'vigente',
+          pdfUrl: cw.pdfUrl || cw.pdf || null
         });
       }
 
@@ -163,7 +164,12 @@ export default function AdminLayout({
 
       <main className="admin-content-area">
         {activeTab === 'dashboard' && (
-          <AdminDashboard items={items} obtenerCalculosItem={obtenerCalculosItem} setActiveTab={setActiveTab} />
+          <AdminDashboard 
+            items={items} 
+            obtenerCalculosItem={obtenerCalculosItem} 
+            setActiveTab={setActiveTab}
+            onSelectPdf={onSelectPdf}
+          />
         )}
         {activeTab === 'equipos' && (
           <AdminEquipos
@@ -176,8 +182,13 @@ export default function AdminLayout({
           />
         )}
         {activeTab === 'coworkers' && <AdminCoworkers onSelectPdf={onSelectPdf} />}
-        {activeTab === 'reportes' && <AdminReports items={items} />}
-        {activeTab === 'alertas' && <AlertsManager items={unifiedAlertItems} />}
+        {activeTab === 'reportes' && <AdminReports items={items} onSelectPdf={onSelectPdf} />}
+        {activeTab === 'alertas' && (
+          <AlertsManager 
+            items={unifiedAlertItems} 
+            onSelectPdf={onSelectPdf} // <--- Pasamos la función a Alertas
+          />
+        )}
       </main>
     </div>
   );

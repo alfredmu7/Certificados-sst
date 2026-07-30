@@ -1,7 +1,8 @@
 // src/components/alerts/AlertsManager.jsx
 import React, { useState, useMemo } from 'react';
-import { Search, Calendar, ShieldAlert, CheckCircle, Clock } from 'lucide-react';
+import { Search, Calendar, ShieldAlert, CheckCircle, Clock, FileText } from 'lucide-react';
 import AlertHeader from './AlertHeader';
+import PdfModal from '../PdfModal'; // Se importa el modal previamente corregido
 import '../../styles/AlertsManager.css';
 
 // Transforma textos a Capital Case
@@ -14,6 +15,14 @@ const formatCapitalCase = (str = '') => {
     .join(' ');
 };
 
+// Función auxiliar para parsear fechas "YYYY-MM-DD" en hora local (evita desfases de Timezone)
+const parseLocalDate = (dateStr) => {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split('-').map(Number);
+  if (!year || !month || !day) return new Date(dateStr);
+  return new Date(year, month - 1, day);
+};
+
 const calculateStatus = (item) => {
   let daysLeft = item.diasRestantes;
   const expirationDateStr = item.fechaVencimiento;
@@ -22,12 +31,12 @@ const calculateStatus = (item) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [year, month, day] = expirationDateStr.split('-').map(Number);
-    const expDate = new Date(year, month - 1, day);
-    expDate.setHours(0, 0, 0, 0);
-
-    const diffTime = expDate - today;
-    daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const expDate = parseLocalDate(expirationDateStr);
+    if (expDate) {
+      expDate.setHours(0, 0, 0, 0);
+      const diffTime = expDate - today;
+      daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
   }
 
   if (daysLeft === null || daysLeft === undefined || isNaN(daysLeft)) {
@@ -50,13 +59,17 @@ export default function AlertsManager({ items = [] }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
+  // State para controlar el Modal del PDF
+  const [selectedPdfItem, setSelectedPdfItem] = useState(null);
+
   const processedItems = useMemo(() => {
-    return items.map((item) => {
+    return items.map((item, index) => {
       const calc = calculateStatus(item);
       const categoryFormatted = formatCapitalCase(item.tipoCategoria || 'General');
 
       return {
         ...item,
+        uniqueKey: item.id || `alert-item-${index}`,
         displayCategory: categoryFormatted,
         status: item.estado ? item.estado.toUpperCase().replace('-', '_') : calc.status,
         daysLeft: calc.daysLeft,
@@ -83,12 +96,14 @@ export default function AlertsManager({ items = [] }) {
   const validCount = useMemo(() => processedItems.filter((i) => i.status === 'VIGENTE').length, [processedItems]);
 
   const filteredItems = useMemo(() => {
+    const searchLower = searchTerm.toLowerCase();
+
     return processedItems.filter((item) => {
       const matchesSearch =
-        item.entidadNombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.identificador?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.nombreDocumento?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.displayCategory?.toLowerCase().includes(searchTerm.toLowerCase());
+        item.entidadNombre?.toLowerCase().includes(searchLower) ||
+        item.identificador?.toLowerCase().includes(searchLower) ||
+        item.nombreDocumento?.toLowerCase().includes(searchLower) ||
+        item.displayCategory?.toLowerCase().includes(searchLower);
 
       const matchesCategory =
         categoryFilter === 'ALL' ||
@@ -98,14 +113,42 @@ export default function AlertsManager({ items = [] }) {
 
       let matchesDate = true;
       if (item.fechaVencimiento) {
-        const itemDate = new Date(item.fechaVencimiento);
-        if (dateFrom) matchesDate = matchesDate && itemDate >= new Date(dateFrom);
-        if (dateTo) matchesDate = matchesDate && itemDate <= new Date(dateTo);
+        const itemDate = parseLocalDate(item.fechaVencimiento);
+        if (itemDate) {
+          itemDate.setHours(0, 0, 0, 0);
+
+          if (dateFrom) {
+            const fromDate = parseLocalDate(dateFrom);
+            fromDate.setHours(0, 0, 0, 0);
+            matchesDate = matchesDate && itemDate >= fromDate;
+          }
+
+          if (dateTo) {
+            const toDate = parseLocalDate(dateTo);
+            toDate.setHours(23, 59, 59, 999);
+            matchesDate = matchesDate && itemDate <= toDate;
+          }
+        }
       }
 
       return matchesSearch && matchesCategory && matchesStatus && matchesDate;
     });
   }, [processedItems, searchTerm, categoryFilter, statusFilter, dateFrom, dateTo]);
+
+  // Handler para abrir el modal transformando las propiedades para el PdfModal
+  const handleOpenPdf = (item) => {
+    setSelectedPdfItem({
+      nombre: item.nombreDocumento || item.entidadNombre || 'Documento',
+      serial: item.identificador || 'N/A',
+      ubicacion: item.displayCategory || 'General',
+      pdfUrl: item.pdfUrl || item.url || item.documentoUrl
+    });
+  };
+
+  // Handler para cerrar el modal
+  const handleClosePdf = () => {
+    setSelectedPdfItem(null);
+  };
 
   return (
     <div className="alerts-manager-container">
@@ -146,7 +189,7 @@ export default function AlertsManager({ items = [] }) {
             <option value="ALL">Todas las Categorías</option>
             {categoriesList.map((cat) => (
               <option key={cat} value={cat}>
-                {cat === 'Coworker' ? 'Coworkers' : ` ${cat}`}
+                {cat === 'Coworker' ? 'Coworkers' : cat}
               </option>
             ))}
           </select>
@@ -177,62 +220,74 @@ export default function AlertsManager({ items = [] }) {
               <th>Documento</th>
               <th>Fecha Vencimiento</th>
               <th>Días Restantes</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
             {filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
-                <tr key={item.id} className={`row-status-${item.status.toLowerCase()}`}>
-                  <td>
-                    <span className={`status-badge ${item.badgeClass}`}>
-                      {item.status === 'VENCIDO' && <ShieldAlert size={14} />}
-                      {item.status === 'POR_VENCER' && <Clock size={14} />}
-                      {item.status === 'VIGENTE' && <CheckCircle size={14} />}
-                      {item.status === 'POR_VENCER' ? 'Por Vencer' : item.status}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="entity-cell">
-                      <span className="entity-name">{item.entidadNombre}</span>
-                      <span className="entity-id">ID: {item.identificador}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="type-tag">
-                      {item.displayCategory === 'Coworker' 
-                        ? ' Coworker' 
-                        : ` ${item.displayCategory}`}
-                    </span>
-                  </td>
-                  {/* Celda condicional: Muestra el tipo específico para Coworker */}
-                  <td>
-                    {item.displayCategory === 'Coworker' ? (
-                      <span className="doc-type-badge">{item.nombreDocumento || 'Certificado'}</span>
-                    ) : (
-                      <span className="doc-type-generic">—</span>
-                    )}
-                  </td>
-                  <td className="date-cell">{item.fechaVencimiento || 'Sin Fecha'}</td>
-                  <td>
-                    <span
-                      className={`days-tag ${
-                        item.daysLeft < 0
-                          ? 'days-negative'
-                          : item.daysLeft <= 30
-                          ? 'days-warning'
-                          : 'days-positive'
-                      }`}
-                    >
-                      {item.daysLeft < 0
-                        ? `Hace ${Math.abs(item.daysLeft)} días`
-                        : `${item.daysLeft} días`}
-                    </span>
-                  </td>
-                </tr>
-              ))
+              filteredItems.map((item) => {
+                const pdfAvailable = Boolean(item.pdfUrl || item.url || item.documentoUrl);
+
+                return (
+                  <tr key={item.uniqueKey} className={`row-status-${item.status.toLowerCase()}`}>
+                    <td>
+                      <span className={`status-badge ${item.badgeClass}`}>
+                        {item.status === 'VENCIDO' && <ShieldAlert size={14} />}
+                        {item.status === 'POR_VENCER' && <Clock size={14} />}
+                        {item.status === 'VIGENTE' && <CheckCircle size={14} />}
+                        {item.status === 'POR_VENCER' ? 'Por Vencer' : item.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="entity-cell">
+                        <span className="entity-name">{item.entidadNombre}</span>
+                        <span className="entity-id">ID: {item.identificador}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="type-tag">
+                        {item.displayCategory === 'Coworker' ? 'Coworker' : item.displayCategory}
+                      </span>
+                    </td>
+                    <td>
+                      {item.displayCategory === 'Coworker' ? (
+                        <span className="doc-type-badge">{item.nombreDocumento || 'Certificado'}</span>
+                      ) : (
+                        <span className="doc-type-generic">—</span>
+                      )}
+                    </td>
+                    <td className="date-cell">{item.fechaVencimiento || 'Sin Fecha'}</td>
+                    <td>
+                      <span
+                        className={`days-tag ${
+                          item.daysLeft < 0
+                            ? 'days-negative'
+                            : item.daysLeft <= 30
+                            ? 'days-warning'
+                            : 'days-positive'
+                        }`}
+                      >
+                        {item.daysLeft < 0
+                          ? `Hace ${Math.abs(item.daysLeft)} días`
+                          : `${item.daysLeft} días`}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="btn-view-pdf-ver"
+                        onClick={() => handleOpenPdf(item)}
+                        disabled={!pdfAvailable}
+                        title={pdfAvailable ? "Ver PDF" : "Sin PDF disponible"}
+                      >
+                        <FileText size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
-                <td colSpan="6" className="empty-table-msg">
+                <td colSpan="7" className="empty-table-msg">
                   No se encontraron registros que coincidan con los criterios de búsqueda.
                 </td>
               </tr>
@@ -240,6 +295,9 @@ export default function AlertsManager({ items = [] }) {
           </tbody>
         </table>
       </div>
+
+      {/* Modal para visualizar el PDF */}
+      <PdfModal item={selectedPdfItem} onClose={handleClosePdf} />
     </div>
   );
 }
