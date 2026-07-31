@@ -13,35 +13,45 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
-import NotificationToast from '../NotificationToast'; // 👈 1. IMPORTACIÓN DEL COMPONENTE
+import NotificationToast from '../NotificationToast';
 import '../../styles/AdminDashboard.css';
 
 /**
- * Función auxiliar para evaluar fechas evitando desfases de zona horaria UTC
+ * Evalúa el estado de la fecha de un documento de coworker
  */
-const evaluarFechaDoc = (fechaStr) => {
-  if (!fechaStr) return 'vencido';
+const evaluarFechaDocCoworker = (fechaStr) => {
+  if (!fechaStr) return 'alerta';
   
-  // Normalizar la fecha a medianoche local
-  const [year, month, day] = fechaStr.split('T')[0].split('-').map(Number);
-  const fecha = new Date(year, month - 1, day);
-  
+  const dateOnly = String(fechaStr).split('T')[0].trim();
+  const parts = dateOnly.split('-');
+  if (parts.length !== 3) return 'alerta';
+
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+
+  if (isNaN(year) || isNaN(month) || isNaN(day)) return 'alerta';
+
+  const fechaDoc = new Date(year, month, day, 0, 0, 0);
   const hoy = new Date();
   hoy.setHours(0, 0, 0, 0);
 
-  const difDias = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
+  const difMs = fechaDoc.getTime() - hoy.getTime();
+  const difDias = Math.floor(difMs / (1000 * 60 * 60 * 24));
 
-  if (difDias < 0) return 'vencido';
-  if (difDias <= 30) return 'por-vencer';
+  if (difDias <= 30) {
+    return 'alerta'; // Agrupa por vencer y vencido
+  }
+
   return 'vigente';
 };
 
 export default function AdminDashboard({ items = [], obtenerCalculosItem, setActiveTab, onOpenModal }) {
   const [coworkersData, setCoworkersData] = useState([]);
   const [loadingCoworkers, setLoadingCoworkers] = useState(true);
-  const [showToast, setShowToast] = useState(true); // 👈 2. ESTADO PARA MOSTRAR/OCULTAR EL TOAST
+  const [showToast, setShowToast] = useState(true);
 
-  // --- CONSULTA COWORKERS CON LIMPIEZA DE DESMONTADO ---
+  // --- CONSULTA COWORKERS ---
   useEffect(() => {
     let isMounted = true;
 
@@ -68,7 +78,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
     };
   }, []);
 
-  // --- MÉTRICAS Y CÁLCULOS DE EQUIPOS (MEMOIZADOS) ---
+  // --- MÉTRICAS Y CÁLCULOS DE EQUIPOS (3 ESTADOS CONSERVADOS) ---
   const equiposMetrics = useMemo(() => {
     const totalEquipos = items.length;
     let escalerasCount = 0;
@@ -79,9 +89,10 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
     let equipVencidos = 0;
 
     items.forEach(item => {
-      if (item.categoria === 'escaleras') escalerasCount++;
-      else if (item.categoria === 'epcc') epccCount++;
-      else if (item.categoria === 'quimicos') quimicosCount++;
+      const cat = (item.categoria || '').toLowerCase();
+      if (cat === 'escaleras') escalerasCount++;
+      else if (cat === 'epcc') epccCount++;
+      else if (cat === 'quimicos') quimicosCount++;
 
       if (obtenerCalculosItem) {
         const { estado } = obtenerCalculosItem(item.fechaCertificacion, item.categoria);
@@ -96,8 +107,10 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
     const pQuimicos = totalEquipos > 0 ? (quimicosCount / totalEquipos) * 100 : 0;
 
     const ordenados = [...items].sort((a, b) => {
-      const fechaA = new Date(a.created_at || a.fechaCreacion || a.id);
-      const fechaB = new Date(b.created_at || b.fechaCreacion || b.id);
+      const rawA = a.created_at || a.fechaCreacion;
+      const rawB = b.created_at || b.fechaCreacion;
+      const fechaA = rawA ? new Date(rawA).getTime() : 0;
+      const fechaB = rawB ? new Date(rawB).getTime() : 0;
       return fechaB - fechaA;
     });
 
@@ -116,38 +129,41 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
     };
   }, [items, obtenerCalculosItem]);
 
-  // --- MÉTRICAS DE COWORKERS (MEMOIZADAS) ---
+  // --- MÉTRICAS DE COWORKERS (VIGENTES / POR VENCER | VENCIDO) ---
   const coworkersMetrics = useMemo(() => {
-    let coworkersAlDia = 0;
-    let coworkersConAlertas = 0;
+    let coworkersVigentes = 0;
+    let coworkersAlerta = 0; // "Por vencer | Vencido"
     let carnetsPorVencer = 0;
 
     coworkersData.forEach(cw => {
-      const estCarnet = evaluarFechaDoc(cw.fecha_carnet || cw.vencimiento_carnet);
-      const estArl = evaluarFechaDoc(cw.fecha_arl || cw.vencimiento_arl);
+      const fechaCarnet = cw.fecha_carnet || cw.vencimiento_carnet;
+      const fechaArl = cw.fecha_arl || cw.vencimiento_arl;
 
-      if (estCarnet === 'por-vencer' || estCarnet === 'vencido') {
+      const estCarnet = evaluarFechaDocCoworker(fechaCarnet);
+      const estArl = evaluarFechaDocCoworker(fechaArl);
+
+      if (estCarnet === 'alerta') {
         carnetsPorVencer++;
       }
 
-      if (estCarnet !== 'vigente' || estArl !== 'vigente') {
-        coworkersConAlertas++;
+      if (estCarnet === 'alerta' || estArl === 'alerta') {
+        coworkersAlerta++;
       } else {
-        coworkersAlDia++;
+        coworkersVigentes++;
       }
     });
 
     const totalCoworkers = coworkersData.length;
-    const pctCoworkersAlDia = totalCoworkers > 0 ? Math.round((coworkersAlDia / totalCoworkers) * 100) : 0;
-    const pctCoworkersAlertas = totalCoworkers > 0 ? 100 - pctCoworkersAlDia : 0;
+    const pctVigentes = totalCoworkers > 0 ? Math.round((coworkersVigentes / totalCoworkers) * 100) : 0;
+    const pctAlerta = totalCoworkers > 0 ? Math.round((coworkersAlerta / totalCoworkers) * 100) : 0;
 
     return {
       totalCoworkers,
-      coworkersAlDia,
-      coworkersConAlertas,
+      coworkersVigentes,
+      coworkersAlerta,
       carnetsPorVencer,
-      pctCoworkersAlDia,
-      pctCoworkersAlertas
+      pctVigentes,
+      pctAlerta
     };
   }, [coworkersData]);
 
@@ -158,8 +174,8 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
   } = equiposMetrics;
 
   const {
-    totalCoworkers, coworkersAlDia, coworkersConAlertas,
-    carnetsPorVencer, pctCoworkersAlDia, pctCoworkersAlertas
+    totalCoworkers, coworkersVigentes, coworkersAlerta,
+    carnetsPorVencer, pctVigentes, pctAlerta
   } = coworkersMetrics;
 
   return (
@@ -220,7 +236,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
 
         <div className="kpi-card" onClick={() => setActiveTab?.('coworkers')}>
           <div className="kpi-info">
-            <span className="kpi-value">{coworkersAlDia}</span>
+            <span className="kpi-value">{coworkersVigentes}</span>
             <span className="kpi-label">Personal Habilitado</span>
           </div>
           <div className="kpi-icon green">
@@ -231,7 +247,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
         <div className="kpi-card" onClick={() => setActiveTab?.('coworkers')}>
           <div className="kpi-info">
             <span className="kpi-value">{carnetsPorVencer}</span>
-            <span className="kpi-label">Carnets por Vencer</span>
+            <span className="kpi-label">Carnets Alerta</span>
           </div>
           <div className="kpi-icon amber">
             <CreditCard size={22} />
@@ -325,29 +341,36 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
                   stroke="#e2e8f0"
                   strokeWidth="3.8"
                 />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#2563eb"
-                  strokeWidth="3.8"
-                  strokeDasharray={`${pEscaleras}, 100`}
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#9333ea"
-                  strokeWidth="3.8"
-                  strokeDasharray={`${pEpcc}, 100`}
-                  strokeDashoffset={`-${pEscaleras}`}
-                />
-                <path
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="#d97706"
-                  strokeWidth="3.8"
-                  strokeDasharray={`${pQuimicos}, 100`}
-                  strokeDashoffset={`-${pEscaleras + pEpcc}`}
-                />
+                {pEscaleras > 0 && (
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#2563eb"
+                    strokeWidth="3.8"
+                    strokeDasharray={`${pEscaleras}, 100`}
+                    strokeDashoffset="0"
+                  />
+                )}
+                {pEpcc > 0 && (
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#9333ea"
+                    strokeWidth="3.8"
+                    strokeDasharray={`${pEpcc}, 100`}
+                    strokeDashoffset={`-${pEscaleras}`}
+                  />
+                )}
+                {pQuimicos > 0 && (
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#d97706"
+                    strokeWidth="3.8"
+                    strokeDasharray={`${pQuimicos}, 100`}
+                    strokeDashoffset={`-${pEscaleras + pEpcc}`}
+                  />
+                )}
               </svg>
               <div className="donut-total">
                 <span className="donut-total-num">{totalEquipos}</span>
@@ -378,7 +401,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        {/* GRÁFICA 2: Estado Vencimiento Equipos */}
+        {/* GRÁFICA 2: Estado Vencimiento Equipos (Original con 3 barras) */}
         <div className="chart-card">
           <div className="chart-header">
             <h3>Vencimiento de Equipos</h3>
@@ -389,13 +412,13 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
             <div className="progress-item">
               <div className="progress-header">
                 <span style={{ color: '#16a34a' }}>Vigentes</span>
-                <span>{equipVigentes} ({totalEquipos > 0 ? Math.round((equipVigentes/totalEquipos)*100) : 0}%)</span>
+                <span>{equipVigentes} ({totalEquipos > 0 ? Math.round((equipVigentes / totalEquipos) * 100) : 0}%)</span>
               </div>
               <div className="progress-track">
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: `${totalEquipos > 0 ? (equipVigentes/totalEquipos)*100 : 0}%`, 
+                    width: `${totalEquipos > 0 ? (equipVigentes / totalEquipos) * 100 : 0}%`, 
                     backgroundColor: '#22c55e' 
                   }}
                 ></div>
@@ -404,14 +427,14 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
 
             <div className="progress-item">
               <div className="progress-header">
-                <span style={{ color: '#d97706' }}>Por Vencer (&lt; 30d)</span>
-                <span>{equipPorVencer} ({totalEquipos > 0 ? Math.round((equipPorVencer/totalEquipos)*100) : 0}%)</span>
+                <span style={{ color: '#d97706' }}>Por Vencer</span>
+                <span>{equipPorVencer} ({totalEquipos > 0 ? Math.round((equipPorVencer / totalEquipos) * 100) : 0}%)</span>
               </div>
               <div className="progress-track">
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: `${totalEquipos > 0 ? (equipPorVencer/totalEquipos)*100 : 0}%`, 
+                    width: `${totalEquipos > 0 ? (equipPorVencer / totalEquipos) * 100 : 0}%`, 
                     backgroundColor: '#f59e0b' 
                   }}
                 ></div>
@@ -421,13 +444,13 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
             <div className="progress-item">
               <div className="progress-header">
                 <span style={{ color: '#dc2626' }}>Vencidos</span>
-                <span>{equipVencidos} ({totalEquipos > 0 ? Math.round((equipVencidos/totalEquipos)*100) : 0}%)</span>
+                <span>{equipVencidos} ({totalEquipos > 0 ? Math.round((equipVencidos / totalEquipos) * 100) : 0}%)</span>
               </div>
               <div className="progress-track">
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: `${totalEquipos > 0 ? (equipVencidos/totalEquipos)*100 : 0}%`, 
+                    width: `${totalEquipos > 0 ? (equipVencidos / totalEquipos) * 100 : 0}%`, 
                     backgroundColor: '#ef4444' 
                   }}
                 ></div>
@@ -436,7 +459,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
 
-        {/* GRÁFICA 3: Documentación del Personal */}
+        {/* GRÁFICA 3: Estado del Personal (Agrupado) */}
         <div className="chart-card">
           <div className="chart-header">
             <h3>Estado del Personal</h3>
@@ -447,13 +470,13 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
             <div className="progress-item">
               <div className="progress-header">
                 <span style={{ color: '#16a34a' }}>Vigentes</span>
-                <span>{coworkersAlDia} ({pctCoworkersAlDia}%)</span>
+                <span>{coworkersVigentes} ({pctVigentes}%)</span>
               </div>
               <div className="progress-track">
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: `${pctCoworkersAlDia}%`, 
+                    width: `${pctVigentes}%`, 
                     backgroundColor: '#22c55e' 
                   }}
                 ></div>
@@ -462,14 +485,14 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
 
             <div className="progress-item">
               <div className="progress-header">
-                <span style={{ color: '#dc2626' }}>En Alerta / Vencidos</span>
-                <span>{coworkersConAlertas} ({pctCoworkersAlertas}%)</span>
+                <span style={{ color: '#dc2626' }}>por vencer | vencido</span>
+                <span>{coworkersAlerta} ({pctAlerta}%)</span>
               </div>
               <div className="progress-track">
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: `${pctCoworkersAlertas}%`, 
+                    width: `${pctAlerta}%`, 
                     backgroundColor: '#ef4444' 
                   }}
                 ></div>
@@ -486,6 +509,7 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
               <p>Inspecciones e ingresos recientes en el sistema</p>
             </div>
             <button 
+              type="button"
               onClick={() => setActiveTab?.('equipos')}
               className="btn-view-all"
             >
@@ -497,8 +521,8 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
             {equiposOrdenados.slice(0, 4).map((item, idx) => (
               <div key={item.id || item.serial || idx} className="activity-item">
                 <div className="activity-info">
-                  <span className="activity-title">{item.nombre || item.serial}</span>
-                  <span className="activity-subtitle">Serial: {item.serial} | Ubicación: {item.ubicacion || 'N/A'}</span>
+                  <span className="activity-title">{item.nombre || item.serial || 'Equipo Sin Nombre'}</span>
+                  <span className="activity-subtitle">Serial: {item.serial || 'N/A'} | Ubicación: {item.ubicacion || 'N/A'}</span>
                 </div>
                 <span className={`activity-tag ${item.categoria}`}>
                   {item.categoria}
@@ -514,16 +538,15 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
         </div>
       </div>
 
-      {/* 👈 3. COMPONENTE TOAST INTEGRADO */}
-      {/* Notification Toast Integrado */}
-        <NotificationToast
-          coworkers={coworkersData}
-          items={items}
-          obtenerCalculosItem={obtenerCalculosItem}
-          isVisible={showToast}
-          onClose={() => setShowToast(false)}
-          onNavigateToAlerts={() => setActiveTab?.('alertas')}
-        />
+      {/* Notification Toast */}
+      <NotificationToast
+        coworkers={coworkersData}
+        items={items}
+        obtenerCalculosItem={obtenerCalculosItem}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        onNavigateToAlerts={() => setActiveTab?.('alertas')}
+      />
     </div>
   );
 }

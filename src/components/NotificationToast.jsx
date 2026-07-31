@@ -124,7 +124,7 @@ export default function NotificationToast({
         {/* Contenido principal del mensaje */}
         <div className="toast-content">
           <div className="toast-header">
-            <h4>Alerta de Certificados y Equipos</h4>
+            <h4>Alerta</h4>
             {onClose && (
               <button
                 type="button"
@@ -147,17 +147,17 @@ export default function NotificationToast({
               </>
             ) : stats.expiredCount > 0 ? (
               <>
-                Existen <strong>{stats.expiredCount} registro(s) vencido(s)</strong>.
+                Existen <strong>{stats.expiredCount} Documento(s) vencido(s)</strong>.
               </>
             ) : (
               <>
-                Existen <strong>{stats.warningCount} registro(s) próximos a vencer</strong>.
+                Existen <strong>{stats.warningCount} Documento(s) próximo(s) a vencer</strong>.
               </>
             )}
           </p>
 
           <span className="toast-action-link">
-            Revisar alertas <ChevronRight size={14} />
+            Revisar ahora<ChevronRight size={14} />
           </span>
         </div>
       </div>
