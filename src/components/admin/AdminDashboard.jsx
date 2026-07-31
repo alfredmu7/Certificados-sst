@@ -515,12 +515,15 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
       </div>
 
       {/* 👈 3. COMPONENTE TOAST INTEGRADO */}
-      <NotificationToast
-        coworkers={coworkersData}
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-        onNavigateToAlerts={() => setActiveTab?.('alertas')}
-      />
+      {/* Notification Toast Integrado */}
+        <NotificationToast
+          coworkers={coworkersData}
+          items={items}
+          obtenerCalculosItem={obtenerCalculosItem}
+          isVisible={showToast}
+          onClose={() => setShowToast(false)}
+          onNavigateToAlerts={() => setActiveTab?.('alertas')}
+        />
     </div>
   );
 }
