@@ -1,0 +1,117 @@
+/* Posicionamiento fijo flotante */
+.notification-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Tarjeta principal */
+.toast-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  width: 320px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.toast-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.15), 0 10px 12px -4px rgba(0, 0, 0, 0.06);
+}
+
+/* Ícono e identificador visual de gravedad */
+.toast-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.toast-icon-wrapper.status-danger {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.toast-icon-wrapper.status-warning {
+  background-color: #fffbe2;
+  color: #d97706;
+}
+
+/* Contenido de texto */
+.toast-content {
+  flex: 1;
+}
+
+.toast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.toast-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.btn-toast-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-toast-close:hover {
+  color: #475569;
+  background-color: #f1f5f9;
+}
+
+.toast-message {
+  margin: 0 0 8px 0;
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.toast-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0284c7;
+}
+
+.toast-card:hover .toast-action-link {
+  text-decoration: underline;
+}
+
+/* Animación de entrada */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

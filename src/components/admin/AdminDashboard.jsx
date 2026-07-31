@@ -13,6 +13,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
+import NotificationToast from '../NotificationToast'; // 👈 1. IMPORTACIÓN DEL COMPONENTE
 import '../../styles/AdminDashboard.css';
 
 /**
@@ -38,6 +39,7 @@ const evaluarFechaDoc = (fechaStr) => {
 export default function AdminDashboard({ items = [], obtenerCalculosItem, setActiveTab, onOpenModal }) {
   const [coworkersData, setCoworkersData] = useState([]);
   const [loadingCoworkers, setLoadingCoworkers] = useState(true);
+  const [showToast, setShowToast] = useState(true); // 👈 2. ESTADO PARA MOSTRAR/OCULTAR EL TOAST
 
   // --- CONSULTA COWORKERS CON LIMPIEZA DE DESMONTADO ---
   useEffect(() => {
@@ -511,6 +513,14 @@ export default function AdminDashboard({ items = [], obtenerCalculosItem, setAct
           </div>
         </div>
       </div>
+
+      {/* 👈 3. COMPONENTE TOAST INTEGRADO */}
+      <NotificationToast
+        coworkers={coworkersData}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+        onNavigateToAlerts={() => setActiveTab?.('alertas')}
+      />
     </div>
   );
 }
