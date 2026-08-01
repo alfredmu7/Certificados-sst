@@ -1,0 +1,279 @@
+/* ==========================================
+   ESTILOS GENERALES Y MODULO DE HERRAMIENTAS
+   ========================================== */
+.pdf-analyzer-container, 
+.tools-module-container {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Botón de regreso */
+.btn-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.4rem;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.btn-back-link:hover {
+  color: #ffffff;
+}
+
+/* ==========================================
+   ZONA DE CARGA (DROPZONE) Y PROCESAMIENTO
+   ========================================== */
+.folder-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 2rem;
+  text-align: center;
+  border: 2px dashed #cbd5e1;
+  background-color: #f8fafc;
+  border-radius: 14px;
+  margin-top: 24px;
+}
+
+.folder-drop-zone h3 {
+  margin: 1rem 0 0.4rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.folder-drop-zone p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.drop-icon {
+  color: #2563eb;
+}
+
+.btn-primary-upload {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.75rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-primary-upload:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.processing-card {
+  background: white;
+  padding: 32px;
+  border-radius: 14px;
+  text-align: center;
+  margin-top: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+  color: #2563eb;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.progress-bar-bg {
+  background: #e2e8f0;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.progress-bar-fill {
+  background: #2563eb;
+  height: 100%;
+  transition: width 0.2s ease;
+}
+
+/* ==========================================
+   TARJETAS KPI (METRICAS CENTRADAS SIN ICONOS)
+   ========================================== */
+.kpi-card-centered {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+
+.kpi-card-centered .kpi-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==========================================
+   BOTONES DE ACCIÓN (ACCIONES SUPERIORES)
+   ========================================== */
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Botón 'Analizar otra carpeta' (Outline/Secundario) */
+.btn-outline-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-reset:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+/* Botón 'Exportar Excel' (Solo Ícono con Tooltip) */
+.btn-excel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: #16a34a;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-excel-icon:hover {
+  background-color: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   DESPLEGABLE Y TABLA DE DETALLES
+   ========================================== */
+.btn-toggle-details {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 0;
+}
+
+.badge-count {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.detail-table-wrapper {
+  overflow-x: auto;
+  margin-top: 0.5rem;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.results-table th {
+  padding: 0.75rem 1rem;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.results-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.file-name-cell {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.file-type-cell {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.file-size-cell {
+  color: #64748b;
+}
+
+/* ==========================================
+   GRILLA DE HERRAMIENTAS ADICIONALES
+   ========================================== */
+.tools-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.tool-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.text-success { color: #16a34a; }
+.text-warning { color: #d97706; }
