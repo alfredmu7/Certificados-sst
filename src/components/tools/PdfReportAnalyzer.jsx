@@ -211,7 +211,7 @@ export default function PdfReportAnalyzer({ onBack }) {
                 onClick={() => setShowDetails(!showDetails)}
               >
                 {showDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                <span>{showDetails ? 'Ocultar' : 'Mostrar'} Detalle Individual por PDF</span>
+                <span>{showDetails ? 'Ocultar' : 'Detalles de Permisos'} Analizados</span>
                 <span className="badge-count">
                   ({reportData.detallesArchivos?.length || 0} archivos)
                 </span>
