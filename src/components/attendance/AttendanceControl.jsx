@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { supabase } from '../../supabaseClient';
-import '../../styles/attendanceControl.css'; 
+import '../../styles/AttendanceControl.css'; 
 
 const FESTIVOS_COLOMBIA_2026 = [
   '2026-01-01', '2026-01-12', '2026-03-23', '2026-04-02', '2026-04-03',
