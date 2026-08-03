@@ -347,8 +347,8 @@ export default function AttendanceControl({ onBack }) {
           <div className="modal-card">
             <div className="modal-header">
               <div>
-                <h3>Nuevo Integrante</h3>
-                <p>Registra un nuevo trabajador en la base de datos de SST</p>
+                <h3>Agregar Coworker</h3>
+                <p>Registra un nuevo técnico para el control de asistencia interno de SST</p>
               </div>
               <button type="button" className="btn-close-modal" onClick={() => setShowModal(false)}>
                 <X size={18} />
@@ -363,7 +363,7 @@ export default function AttendanceControl({ onBack }) {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Ej. Carlos Mendoza"
+                  placeholder="Ej. Fabian Bernal"
                   value={nuevoNombre}
                   onChange={(e) => setNuevoNombre(e.target.value)}
                   required
@@ -396,8 +396,7 @@ export default function AttendanceControl({ onBack }) {
                   >
                     <option value="M">Masculino (M)</option>
                     <option value="F">Femenino (F)</option>
-                    <option value="Otro">Otro</option>
-                  </select>
+                    </select>
                 </div>
               </div>
 
