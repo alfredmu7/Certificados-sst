@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FileSearch, Calculator } from 'lucide-react';
-import PdfReportAnalyzer from '../tools/PdfReportAnalyzer';
+import { FileSearch, CalendarCheck } from 'lucide-react';
+import PdfReportAnalyzer from '../../components/tools/PdfReportAnalyzer'; // Import de la herramienta existente
+import AttendanceControl from '../attendance/AttendanceControl'; // Import de la nueva herramienta
 
 export default function AdminReports() {
   const [activeTool, setActiveTool] = useState(null);
@@ -15,15 +16,26 @@ export default function AdminReports() {
       badge: 'Optimización de Tiempo',
       enabled: true
     },
-  
+    {
+      id: 'attendance-control',
+      title: 'Control de Asistencia SST',
+      description: 'Matriz mensual en tiempo real para registrar asistencias, horas laboradas, ausentismo, incapacidades, etc.',
+      icon: CalendarCheck,
+      badge: 'Sincronización con calendario',
+      enabled: true
+    }
   ];
 
-  // 2. Si el usuario selecciona la tarjeta, se muestra directamente tu componente PdfReportAnalyzer
+  // Renderizado dinámico según la herramienta activa
   if (activeTool === 'pdf-analyzer') {
     return <PdfReportAnalyzer onBack={() => setActiveTool(null)} />;
   }
 
-  // 3. Si no hay herramienta activa, muestra el panel de tarjetas
+  if (activeTool === 'attendance-control') {
+    return <AttendanceControl onBack={() => setActiveTool(null)} />;
+  }
+
+  // Vista principal de tarjetas
   return (
     <div style={{ padding: '24px', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
       <div style={{ marginBottom: '24px' }}>
