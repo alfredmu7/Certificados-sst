@@ -105,7 +105,6 @@ export default function AttendanceControl({ onBack }) {
   const handleCellChange = async (trabajadorId, dateStr, codigo) => {
     const key = `${trabajadorId}_${dateStr}`;
     
-    // Actualizar estado local inmediatamente para refrescar la UI y el cálculo de métricas
     setAsistencia(prev => {
       const copy = { ...prev };
       if (!codigo) {
@@ -160,7 +159,7 @@ export default function AttendanceControl({ onBack }) {
       setNuevoNombre('');
       setNuevaCedula('');
       setShowModal(false);
-      fetchData(); // Recargar datos
+      fetchData();
     } catch (err) {
       alert('Error al guardar trabajador: ' + err.message);
     } finally {
@@ -221,6 +220,47 @@ export default function AttendanceControl({ onBack }) {
     };
   }, [trabajadores, daysInMonth, asistencia]);
 
+  // FUNCIÓN PARA EXPORTAR LA TABLA A EXCEL (.XLSX)
+  const handleExportExcel = () => {
+    if (trabajadores.length === 0) {
+      alert('No hay datos para exportar.');
+      return;
+    }
+
+    // Construcción de la matriz de datos
+    const dataToExport = trabajadores.map((t, idx) => {
+      const stats = metrics.workerTotals[t.id] || { diasTrabajados: 0, horasTrabajador: 0 };
+      
+      // Datos fijos del trabajador
+      const row = {
+        '#': idx + 1,
+        'Nombre Completo': t.nombre_completo,
+        'Cédula': t.cedula,
+        'Género': t.genero || 'M'
+      };
+
+      // Columnas dinámicas de días (1 al 30/31)
+      daysInMonth.forEach((d) => {
+        const mark = asistencia[`${t.id}_${d.dateStr}`]?.codigo || '-';
+        row[`Día ${d.dayNumber}`] = mark;
+      });
+
+      // Totales
+      row['Días Trabajados'] = stats.diasTrabajados;
+      row['Total HHT'] = stats.horasTrabajador;
+
+      return row;
+    });
+
+    // Crear libro de trabajo en XLSX
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Asistencia SST');
+
+    // Descargar archivo
+    XLSX.writeFile(workbook, `Control_Asistencia_${selectedMonth}.xlsx`);
+  };
+
   return (
     <div className="attendance-container">
       {/* BANNER PRINCIPAL */}
@@ -235,13 +275,25 @@ export default function AttendanceControl({ onBack }) {
           <p>Sincronización en tiempo real con Supabase (Ley 42H)</p>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <input 
             type="month" 
             value={selectedMonth} 
             onChange={(e) => setSelectedMonth(e.target.value)}
             className="input-month"
           />
+
+          {/* BOTÓN EXPORTAR EXCEL */}
+          <button 
+            type="button" 
+            className="btn-add-worker" 
+            onClick={handleExportExcel}
+            style={{ backgroundColor: '#16a34a' }} /* Color verde Excel */
+            title="Descargar reporte en formato Excel"
+          >
+            <FileSpreadsheet size={16} /> Exportar Excel
+          </button>
+
           <button type="button" className="btn-add-worker" onClick={() => setShowModal(true)}>
             <UserPlus size={16} /> Agregar Trabajador
           </button>
@@ -396,7 +448,7 @@ export default function AttendanceControl({ onBack }) {
                   >
                     <option value="M">Masculino (M)</option>
                     <option value="F">Femenino (F)</option>
-                    </select>
+                  </select>
                 </div>
               </div>
 
