@@ -71,7 +71,7 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* BOTÓN AGREGAR TRABAJADOR */
+/* BOTÓN ACCIONES GENERALES */
 .btn-add-worker {
   background-color: #2563eb;
   color: white;
@@ -116,6 +116,52 @@
   border-radius: 12px;
   border: 1px solid transparent;
   font-weight: 500;
+}
+
+/* ==========================================
+   ESTILOS DE DASHBOARD & TARJETA HHT POR GÉNERO
+   ========================================== */
+.gender-hht-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.gender-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.gender-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b21a8;
+  margin-bottom: 2px;
+}
+
+.gender-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.gender-value small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.gender-divider {
+  width: 1px;
+  height: 28px;
+  background-color: #e9d5ff;
+  margin: 0 12px;
 }
 
 /* ==========================================
@@ -215,12 +261,9 @@ th.col-sticky {
 }
 
 /* ==========================================
-   MODAL REGISTRAR NUEVO TRABAJADOR / EQUIPO
+   MODAL REGISTRAR NUEVO TRABAJADOR
    ========================================== */
-
-/* Fondo oscuro desenfocado */
-.modal-backdrop,
-.modal-overlay {
+.modal-backdrop {
   position: fixed;
   top: 0; 
   left: 0; 
@@ -237,7 +280,6 @@ th.col-sticky {
   animation: fadeIn 0.2s ease-out;
 }
 
-/* Tarjeta principal del modal */
 .modal-card {
   background: #ffffff;
   width: 100%;
@@ -251,13 +293,12 @@ th.col-sticky {
   flex-direction: column;
 }
 
-/* CABECERA AZUL INTENSO (DISEÑO EXACTO) */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  background-color: #2563eb; /* Azul corporativo */
+  background-color: #2563eb;
   color: #ffffff;
 }
 
@@ -275,9 +316,7 @@ th.col-sticky {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* Botón 'X' transparente y cuadrado */
-.btn-close-modal,
-.btn-close {
+.btn-close-modal {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: #ffffff;
@@ -292,15 +331,12 @@ th.col-sticky {
   padding: 0;
 }
 
-.btn-close-modal:hover,
-.btn-close:hover {
+.btn-close-modal:hover {
   background-color: rgba(255, 255, 255, 0.35);
   color: #ffffff;
 }
 
-/* CUERPO Y FORMULARIO DEL MODAL */
-.modal-body,
-.modal-form {
+.modal-body {
   padding: 1.75rem 1.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -314,15 +350,13 @@ th.col-sticky {
   gap: 0.4rem;
 }
 
-.form-row,
-.form-grid-2 {
+.form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
 }
 
-.form-label,
-.form-group label {
+.form-label {
   font-size: 0.875rem;
   font-weight: 600;
   color: #475569;
@@ -332,9 +366,7 @@ th.col-sticky {
   gap: 4px;
 }
 
-.form-control,
-.modal-body input,
-.modal-body select {
+.form-control {
   width: 100%;
   padding: 0.7rem 0.9rem;
   border: 1px solid #cbd5e1;
@@ -347,62 +379,17 @@ th.col-sticky {
   box-sizing: border-box;
 }
 
-.form-control::placeholder,
-.modal-body input::placeholder {
+.form-control::placeholder {
   color: #94a3b8;
 }
 
-.form-control:focus,
-.modal-body input:focus,
-.modal-body select:focus {
+.form-control:focus {
   border-color: #2563eb;
   background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.form-hint {
-  font-size: 0.775rem;
-  color: #64748b;
-  margin-top: 0.15rem;
-}
-
-/* CAJA DE DROPZONE PARA PDF (DISEÑO IGUAL A LA IMAGEN) */
-.pdf-upload-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 0.4rem;
-  display: block;
-}
-
-.file-dropzone-label {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.85rem 1rem;
-  background-color: #f0f6ff; /* Fondo azul pastel */
-  border: 2px dashed #2563eb; /* Borde azul punteado */
-  border-radius: 10px;
-  cursor: pointer;
-  color: #334155;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-  box-sizing: border-box;
-}
-
-.file-dropzone-label:hover {
-  background-color: #e0edff;
-}
-
-.file-dropzone-label svg {
-  color: #334155;
-  flex-shrink: 0;
-}
-
-/* LÍNEA SEPARADORA Y BOTONES INFERIORES */
-.modal-actions,
-.modal-actions-container {
+.modal-actions {
   margin-top: 0.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid #f1f5f9;
@@ -411,8 +398,7 @@ th.col-sticky {
   gap: 0.75rem;
 }
 
-.btn-secondary,
-.modal-actions button[type="button"] {
+.btn-secondary {
   background-color: #f1f5f9;
   border: 1px solid #e2e8f0;
   color: #475569;
@@ -424,14 +410,12 @@ th.col-sticky {
   transition: all 0.2s ease;
 }
 
-.btn-secondary:hover,
-.modal-actions button[type="button"]:hover {
+.btn-secondary:hover {
   background-color: #e2e8f0;
   color: #0f172a;
 }
 
-.btn-primary, 
-.btn-save {
+.btn-primary {
   background-color: #2563eb;
   border: none;
   color: #ffffff;
@@ -446,13 +430,11 @@ th.col-sticky {
   transition: background-color 0.2s ease;
 }
 
-.btn-primary:hover, 
-.btn-save:hover {
+.btn-primary:hover {
   background-color: #1d4ed8;
 }
 
-.btn-primary:disabled, 
-.btn-save:disabled {
+.btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -490,8 +472,7 @@ th.col-sticky {
 }
 
 @media (max-width: 520px) {
-  .form-row,
-  .form-grid-2 {
+  .form-row {
     grid-template-columns: 1fr;
   }
 }
