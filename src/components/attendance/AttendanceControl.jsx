@@ -188,7 +188,14 @@ function InternalAttendanceDashboard({ trabajadores, asistencia, daysInMonth, se
 
 // --- COMPONENTE PRINCIPAL ---
 export default function AttendanceControl({ onBack }) {
-  const [selectedMonth, setSelectedMonth] = useState('2026-07');
+  const [selectedMonth, setSelectedMonth] = useState(()=> {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+});
+
+
   const [trabajadores, setTrabajadores] = useState([]);
   const [asistencia, setAsistencia] = useState({});
   const [observacionesGenerales, setObservacionesGenerales] = useState({});
@@ -333,7 +340,7 @@ export default function AttendanceControl({ onBack }) {
       console.error('Error inesperado de red o código:', err);
     }
   };
-  
+
   // Crear Trabajador
   const handleAddTrabajador = async (e) => {
     e.preventDefault();
