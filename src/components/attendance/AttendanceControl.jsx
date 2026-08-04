@@ -85,7 +85,7 @@ function InternalAttendanceDashboard({ trabajadores, asistencia, daysInMonth, se
   return (
     <div className="attendance-dashboard">
       <div className="dashboard-header">
-        <h3>📊 Resumen Ejecutivo y Métricas SST ({selectedMonth})</h3>
+        <h3>📊 Métricas SST ({selectedMonth})</h3>
       </div>
 
       <div className="kpi-grid">
@@ -493,7 +493,7 @@ const handleDeleteTrabajador = async (id, nombre) => {
             </button>
           )}
           <h2>Control de Asistencia SST</h2>
-          <p>Sincronización en tiempo real con Supabase (Ley 42H)</p>
+          <p>LLeva el registro de asistencia diario por trabajador</p>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
