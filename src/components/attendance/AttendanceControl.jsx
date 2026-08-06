@@ -17,11 +17,11 @@ const FESTIVOS_COLOMBIA_2026 = [
 ];
 
 const CODIGOS_ASISTENCIA = {
-  DC: { label: 'Día Completo (8.4h)', horas: 8.4, color: '#22c55e', bg: '#dcfce7' },
-  D:  { label: 'Disponibilidad (Variable)', horas: 8.4, esVariable: true, color: '#16a34a', bg: '#dcfce7' },
-  MD: { label: 'Medio Día (4.2h)', horas: 4.2, color: '#eab308', bg: '#fef9c3' },
+  DC: { label: 'Día Completo (8.5h)', horas: 8.5, color: '#22c55e', bg: '#dcfce7' },
+  D:  { label: 'Disponibilidad (Variable)', horas: 8.5, esVariable: true, color: '#16a34a', bg: '#dcfce7' },
+  MD: { label: 'Medio Día (4.25h)', horas: 4.25, color: '#eab308', bg: '#fef9c3' },
   CL: { label: 'Checklist (4.0h)', horas: 4.0, color: '#f97316', bg: '#ffedd5' },
-  I:  { label: 'Incapacidad (0h)', horas: 0, esIncapacidad: true, color: '#ef4444', bg: '#fee2e2' },
+  I:  { label: 'Incapacidad (8.5h)', horas: 8.5, esIncapacidad: true, color: '#ef4444', bg: '#fee2e2' },
   V:  { label: 'Vacaciones (0h)', horas: 0, color: '#3b82f6', bg: '#dbeafe' },
 };
 
@@ -156,6 +156,10 @@ function InternalAttendanceDashboard({ trabajadores, asistencia, daysInMonth, se
               <strong>{metrics.resumenCodigos.CL} registros</strong>
             </div>
             <div className="breakdown-item">
+              <span>🔴 Incapacidad (I)</span>
+              <strong>{metrics.resumenCodigos.I} registros</strong>
+            </div>
+            <div className="breakdown-item">
               <span>🔵 Vacaciones (V)</span>
               <strong>{metrics.resumenCodigos.V} registros</strong>
             </div>
@@ -163,7 +167,7 @@ function InternalAttendanceDashboard({ trabajadores, asistencia, daysInMonth, se
         </div>
 
         <div className="dashboard-card">
-          <h4>Indicadores SST (Ley 42H)</h4>
+          <h4>Indicadores SST</h4>
           <div className="sst-metrics-list">
             <div className="sst-metric">
               <Shield size={18} />
@@ -188,13 +192,12 @@ function InternalAttendanceDashboard({ trabajadores, asistencia, daysInMonth, se
 
 // --- COMPONENTE PRINCIPAL ---
 export default function AttendanceControl({ onBack }) {
-  const [selectedMonth, setSelectedMonth] = useState(()=> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
-});
-
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+  });
 
   const [trabajadores, setTrabajadores] = useState([]);
   const [asistencia, setAsistencia] = useState({});
@@ -243,7 +246,6 @@ export default function AttendanceControl({ onBack }) {
       const lastDay = new Date(year, month, 0).getDate();
       const endDate = `${selectedMonth}-${String(lastDay).padStart(2, '0')}`;
 
-      // Se leen TODOS los trabajadores para reflejar eliminaciones reales
       const [resTrab, resAsist] = await Promise.all([
         supabase.from('trabajadores').select('*').order('nombre_completo', { ascending: true }),
         supabase.from('asistencia_diaria').select('*').gte('fecha', startDate).lte('fecha', endDate)
@@ -279,7 +281,7 @@ export default function AttendanceControl({ onBack }) {
     fetchData();
   }, [selectedMonth]);
 
- // Guardar Marca y Horas en Supabase
+  // Guardar Marca y Horas en Supabase
   const handleCellChange = async (trabajadorId, dateStr, codigo, customHours) => {
     const key = `${trabajadorId}_${dateStr}`;
     const defaultHours = CODIGOS_ASISTENCIA[codigo]?.horas || 0;
@@ -305,7 +307,6 @@ export default function AttendanceControl({ onBack }) {
     // 2. Persistencia en Supabase
     try {
       if (!codigo) {
-        // Si el selector queda en blanco (-), se elimina la fila
         const { error } = await supabase
           .from('asistencia_diaria')
           .delete()
@@ -317,7 +318,6 @@ export default function AttendanceControl({ onBack }) {
           alert(`Error al eliminar: ${error.message}`);
         }
       } else {
-        // Upsert usando la restricción UNIQUE(trabajador_id, fecha)
         const { error } = await supabase
           .from('asistencia_diaria')
           .upsert(
@@ -370,36 +370,32 @@ export default function AttendanceControl({ onBack }) {
     }
   };
 
-  // Eliminar Trabajador Definitivamente de Supabase y UI
-const handleDeleteTrabajador = async (id, nombre) => {
-  if (!window.confirm(`¿Seguro que deseas eliminar definitivamente a ${nombre}?`)) {
-    return;
-  }
-
-  try {
-    // 1. Borrar directamente en Supabase (retornando el registro eliminado con .select())
-    const { data, error } = await supabase
-      .from('trabajadores')
-      .delete()
-      .eq('id', id)
-      .select();
-
-    if (error) throw error;
-
-    // Si Supabase devuelve array vacío, RLS bloqueó el borrado en silencio
-    if (!data || data.length === 0) {
-      alert('No se pudo borrar en la base de datos. Revisa las políticas RLS de la tabla "trabajadores".');
+  // Eliminar Trabajador
+  const handleDeleteTrabajador = async (id, nombre) => {
+    if (!window.confirm(`¿Seguro que deseas eliminar definitivamente a ${nombre}?`)) {
       return;
     }
 
-    // 2. Refrescar el estado de React al instante
-    setTrabajadores(prev => prev.filter(t => t.id !== id));
+    try {
+      const { data, error } = await supabase
+        .from('trabajadores')
+        .delete()
+        .eq('id', id)
+        .select();
 
-  } catch (err) {
-    console.error('Error al borrar trabajador:', err);
-    alert(`Error eliminando a ${nombre}: ` + err.message);
-  }
-};
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        alert('No se pudo borrar en la base de datos. Revisa las políticas RLS de la tabla "trabajadores".');
+        return;
+      }
+
+      setTrabajadores(prev => prev.filter(t => t.id !== id));
+    } catch (err) {
+      console.error('Error al borrar trabajador:', err);
+      alert(`Error eliminando a ${nombre}: ` + err.message);
+    }
+  };
 
   // Métricas para la Tabla
   const metrics = useMemo(() => {
@@ -465,7 +461,8 @@ const handleDeleteTrabajador = async (id, nombre) => {
         const item = asistencia[`${t.id}_${d.dateStr}`];
         let val = '-';
         if (item?.codigo) {
-          val = item.codigo === 'D' ? `D (${item.horas ?? 8.4}h)` : item.codigo;
+          const hrs = item.horas ?? CODIGOS_ASISTENCIA[item.codigo]?.horas ?? 0;
+          val = `${item.codigo} (${hrs}h)`;
         }
         row[`Día ${d.dayNumber}`] = val;
       });
@@ -493,7 +490,7 @@ const handleDeleteTrabajador = async (id, nombre) => {
             </button>
           )}
           <h2>Control de Asistencia SST</h2>
-          <p>LLeva el registro de asistencia diario por trabajador</p>
+          <p>Lleva el registro de asistencia diario por trabajador</p>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -529,7 +526,7 @@ const handleDeleteTrabajador = async (id, nombre) => {
         </div>
       </div>
 
-      {/* COMPONENTE DASHBOARD (Opcional colapsable) */}
+      {/* COMPONENTE DASHBOARD */}
       {showDashboard && (
         <InternalAttendanceDashboard 
           trabajadores={trabajadores}
@@ -589,8 +586,11 @@ const handleDeleteTrabajador = async (id, nombre) => {
                       const key = `${t.id}_${d.dateStr}`;
                       const currentItem = asistencia[key];
                       const currentCode = currentItem?.codigo || '';
-                      const currentHours = currentItem?.horas !== undefined ? currentItem.horas : 8.4;
                       const codeConfig = CODIGOS_ASISTENCIA[currentCode];
+                      
+                      const currentHours = currentItem?.horas !== undefined && currentItem?.horas !== null
+                        ? currentItem.horas
+                        : (codeConfig?.horas ?? 0);
 
                       return (
                         <td key={d.dateStr} className="cell-day">
@@ -612,25 +612,25 @@ const handleDeleteTrabajador = async (id, nombre) => {
                               <option value="V">V</option>
                             </select>
 
-                            {/* Campo editable si se marca Disponibilidad (D) */}
-                            {currentCode === 'D' && (
+                            {/* Campo editable disponible para todas las opciones */}
+                            {currentCode !== '' && (
                               <input
                                 type="number"
-                                step="0.5"
+                                step="0.25"
                                 min="0"
                                 max="24"
                                 value={currentHours}
-                                onChange={(e) => handleCellChange(t.id, d.dateStr, 'D', e.target.value)}
+                                onChange={(e) => handleCellChange(t.id, d.dateStr, currentCode, e.target.value)}
                                 style={{
                                   width: '42px',
                                   fontSize: '0.7rem',
                                   textAlign: 'center',
-                                  border: '1px solid #16a34a',
+                                  border: `1px solid ${codeConfig?.color || '#16a34a'}`,
                                   borderRadius: '4px',
                                   padding: '1px',
                                   background: '#fff'
                                 }}
-                                title="Editar horas de disponibilidad"
+                                title="Editar horas de la jornada"
                               />
                             )}
                           </div>
